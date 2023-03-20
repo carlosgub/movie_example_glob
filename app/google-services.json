@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "566504910793",
+    "project_id": "movie-globant-example",
+    "storage_bucket": "movie-globant-example.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566504910793:android:2e8c0ffac2597d310ac218",
+        "android_client_info": {
+          "package_name": "com.carlosgub.globant.moviexample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "566504910793-b98f7rgg5acge95r94qmepi907hbc2q7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiSSQ0nfsiEwCOmOjuD7CnpXcqIllGddg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "566504910793-b98f7rgg5acge95r94qmepi907hbc2q7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
