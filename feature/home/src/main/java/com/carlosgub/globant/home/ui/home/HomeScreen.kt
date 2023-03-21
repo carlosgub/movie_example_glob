@@ -45,6 +45,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -142,16 +144,18 @@ fun HomeScreen(
             onValueChange = {
                 viewModel.queryFieldChange(it)
             },
-            modifier = Modifier.constrainAs(searchBar) {
-                linkTo(
-                    start = parent.start,
-                    startMargin = spacing_6,
-                    end = parent.end,
-                    endMargin = spacing_6
-                )
-                top.linkTo(parent.top, spacing_4)
-                width = Dimension.fillToConstraints
-            }
+            modifier = Modifier
+                .semantics { testTag = "home_search" }
+                .constrainAs(searchBar) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_6,
+                        end = parent.end,
+                        endMargin = spacing_6
+                    )
+                    top.linkTo(parent.top, spacing_4)
+                    width = Dimension.fillToConstraints
+                }
         )
         SearchContent(
             uiState = uiState,
@@ -176,6 +180,7 @@ fun HomeScreen(
             onClick = {
                 viewModel.signOut()
             }, modifier = Modifier
+                .semantics { testTag = "home_sign_out" }
                 .constrainAs(fab) {
                     end.linkTo(parent.end, spacing_6)
                     bottom.linkTo(parent.bottom, spacing_6)
@@ -329,7 +334,9 @@ fun LazyVerticalMovies(
     contentPaddingValues: PaddingValues = PaddingValues(vertical = spacing_3),
 ) {
     LazyColumn(
-        modifier = modifier.padding(horizontal = spacing_6),
+        modifier = modifier
+            .semantics { testTag = "home_list" }
+            .padding(horizontal = spacing_6),
         contentPadding = contentPaddingValues,
         state = state
     ) {

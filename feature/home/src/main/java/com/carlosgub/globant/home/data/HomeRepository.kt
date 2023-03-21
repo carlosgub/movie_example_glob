@@ -18,10 +18,10 @@ class HomeRepository @Inject constructor(
     suspend fun getMoviesFromQuery(query: String): List<MovieModel> =
         withContext(Dispatchers.Default) {
             movieDao.deleteMovies()
-            api.getMoviesFromQuery(query).map {
-                val cast = api.getCreditsFromMovie(it.id)
+            api.getMoviesFromQuery(query).map { movie ->
+                val cast = api.getCreditsFromMovie(movie.id)
                 async {
-                    val movieModel = it.toMovieModel(cast)
+                    val movieModel = movie.toMovieModel(cast)
                     movieDao.addMovie(movieModel)
                     movieModel
                 }

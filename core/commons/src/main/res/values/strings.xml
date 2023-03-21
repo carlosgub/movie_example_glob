@@ -1,0 +1,20 @@
+<resources>
+
+
+    <!--region Login-->
+    <string name="login_guest_signin">Continuar como invitado</string>
+    <string name="login_see_password">Mostrar contraseña</string>
+    <string name="login_alternative_title">Ó podes ingresar con</string>
+    <string name="login_google_logo">Google logo</string>
+    <string name="login_facebook_logo">Facebook logo</string>
+    <string name="login_apple_logo">Apple logo</string>
+    <string name="login_signup_first_text">¿No tenes cuenta?</string>
+    <string name="login_signup_second_text">Regístrate</string>
+    <string name="login_login">login</string>
+    <!--endregion-->
+
+    <!--region Login-->
+    <string name="sign_up_sign_up_button">Aceptar</string>
+    <!--endregion-->
+
+</resources>

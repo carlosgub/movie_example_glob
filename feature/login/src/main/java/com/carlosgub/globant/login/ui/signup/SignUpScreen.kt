@@ -36,6 +36,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -167,16 +170,18 @@ fun SignupScreen(
             onKeyboardClick = {
                 focusManager.moveFocus(FocusDirection.Down)
             },
-            modifier = Modifier.constrainAs(nameTextField) {
-                linkTo(
-                    start = parent.start,
-                    startMargin = spacing_10,
-                    endMargin = spacing_10,
-                    end = parent.end
-                )
-                top.linkTo(signUpTitle.bottom, spacing_2)
-                width = Dimension.fillToConstraints
-            }
+            modifier = Modifier
+                .semantics { testTag = "sign_up_name" }
+                .constrainAs(nameTextField) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        endMargin = spacing_10,
+                        end = parent.end
+                    )
+                    top.linkTo(signUpTitle.bottom, spacing_2)
+                    width = Dimension.fillToConstraints
+                }
         ) {
             viewModel.nameFieldChange(it)
         }
@@ -185,16 +190,18 @@ fun SignupScreen(
             onKeyboardClick = {
                 focusManager.moveFocus(FocusDirection.Next)
             },
-            modifier = Modifier.constrainAs(emailTextField) {
-                linkTo(
-                    start = parent.start,
-                    startMargin = spacing_10,
-                    endMargin = spacing_10,
-                    end = parent.end
-                )
-                top.linkTo(nameTextField.bottom, spacing_3)
-                width = Dimension.fillToConstraints
-            }
+            modifier = Modifier
+                .semantics { testTag = "sign_up_email" }
+                .constrainAs(emailTextField) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        endMargin = spacing_10,
+                        end = parent.end
+                    )
+                    top.linkTo(nameTextField.bottom, spacing_3)
+                    width = Dimension.fillToConstraints
+                }
         ) {
             viewModel.emailFieldChange(it)
         }
@@ -207,16 +214,18 @@ fun SignupScreen(
                     viewModel.signUp()
                 }
             },
-            modifier = Modifier.constrainAs(passwordTextField) {
-                linkTo(
-                    start = parent.start,
-                    startMargin = spacing_10,
-                    endMargin = spacing_10,
-                    end = parent.end
-                )
-                top.linkTo(emailTextField.bottom, spacing_3)
-                width = Dimension.fillToConstraints
-            }
+            modifier = Modifier
+                .semantics { testTag = "sign_up_password" }
+                .constrainAs(passwordTextField) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        endMargin = spacing_10,
+                        end = parent.end
+                    )
+                    top.linkTo(emailTextField.bottom, spacing_3)
+                    width = Dimension.fillToConstraints
+                }
         ) {
             viewModel.passwordFieldChange(it)
         }
@@ -241,8 +250,10 @@ fun SignupScreen(
                 viewModel.signUp()
             },
             isEnabled = isSignupEnabled,
-            text = "Aceptar",
-            modifier = Modifier.constrainAs(signupButton) {
+            text = stringResource(id = R.string.sign_up_sign_up_button),
+            modifier = Modifier
+                .semantics { testTag = "sign_up_sign_up_button" }
+                .constrainAs(signupButton) {
                 linkTo(
                     start = parent.start,
                     startMargin = spacing_6,

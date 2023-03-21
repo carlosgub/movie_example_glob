@@ -11,13 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
-import com.carlosgub.globant.core.commons.helpers.navigateAndReplaceStartRoute
 import com.carlosgub.globant.core.commons.helpers.showError
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.theme.theme.PrimaryColor
@@ -65,6 +65,7 @@ fun SplashScreen(
             painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_imdb_logo_168_84),
             contentDescription = "Logo",
             modifier = Modifier
+                .semantics { testTag = "splash_screen_image" }
                 .constrainAs(logo) {
                     linkTo(
                         start = parent.start,
