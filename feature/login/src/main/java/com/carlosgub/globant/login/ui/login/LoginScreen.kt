@@ -2,11 +2,8 @@
 
 package com.carlosgub.globant.login.ui.login
 
-import android.content.Intent
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,14 +27,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -51,6 +45,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +57,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -83,20 +80,12 @@ import com.carlosgub.globant.theme.theme.spacing_10
 import com.carlosgub.globant.theme.theme.spacing_2
 import com.carlosgub.globant.theme.theme.spacing_4
 import com.carlosgub.globant.theme.theme.spacing_6
-import com.facebook.CallbackManager
-import com.facebook.FacebookCallback
-import com.facebook.FacebookException
-import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
+import com.facebook.login.widget.LoginButton
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen(
@@ -126,17 +115,18 @@ fun LoginScreen(
         }
     )
     val token = stringResource(R.string.default_web_client_id)
-    val launcher = rememberFirebaseAuthLauncher(
-        showLoading = {
-            viewModel.showLoading()
-        },
-        onAuthComplete = {
-            goToHome()
-        },
-        onAuthError = {
-            showError(it.message.toString(), context = context)
+    // Equivalent of onActivityResult
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+                viewModel.signWithGoogle(credential)
+            } catch (e: ApiException) {
+                showError(e.message.orEmpty(), context)
+            }
         }
-    )
     showError(uiState, context)
     ConstraintLayout(
         modifier = modifier
@@ -281,8 +271,9 @@ fun LoginScreen(
                 viewModel.loginWithEmailAndPassword()
             },
             isEnabled = isLoginEnabled,
-            text = "Login",
+            text = stringResource(id = com.carlosgub.globant.resources.R.string.login_login),
             modifier = Modifier
+                .semantics { testTag = "login_button" }
                 .constrainAs(loginButton) {
                     linkTo(
                         start = parent.start,
@@ -301,13 +292,16 @@ fun LoginScreen(
                     .show()
             },
             googleClick = {
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(token)
+                    .requestEmail()
+                    .build()
+
                 val googleSignInClient = GoogleSignIn.getClient(context, gso)
                 launcher.launch(googleSignInClient.signInIntent)
+            },
+            loginFacebook = {
+                viewModel.signWithFacebook(it.accessToken)
             },
             modifier = Modifier
                 .constrainAs(alternativeLogin) {
@@ -336,7 +330,7 @@ fun LoginScreen(
             }
         )
         Text(
-            text = "Continuar como invitado",
+            text = stringResource(id = com.carlosgub.globant.resources.R.string.login_guest_signin),
             style = MaterialTheme.typography.body1.copy(
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -469,7 +463,7 @@ fun PasswordTextField(
                 } else {
                     Icons.Filled.VisibilityOff
                 },
-                contentDescription = "Mostrar contraseña",
+                contentDescription = stringResource(id = com.carlosgub.globant.resources.R.string.login_see_password),
                 modifier = Modifier.clickable {
                     passwordIcon = !passwordIcon
                 },
@@ -491,12 +485,13 @@ fun PasswordTextField(
 fun AlternativeLoginContainer(
     appleClick: () -> Unit,
     googleClick: () -> Unit,
+    loginFacebook: (LoginResult) -> Unit,
     modifier: Modifier
 ) {
     ConstraintLayout(modifier = modifier.fillMaxWidth()) {
         val (alternativeLoginTitle, appleLogin, facebookLogin, googleLogin) = createRefs()
 
-        Text(text = "Ó podes ingresar con",
+        Text(text = stringResource(id = com.carlosgub.globant.resources.R.string.login_alternative_title),
             style = MaterialTheme.typography.body2,
             textAlign = TextAlign.Center,
             modifier = Modifier.constrainAs(alternativeLoginTitle) {
@@ -513,7 +508,7 @@ fun AlternativeLoginContainer(
 
         Image(
             painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_apple_logo_22_27),
-            contentDescription = "Logo",
+            contentDescription = stringResource(id = com.carlosgub.globant.resources.R.string.login_apple_logo),
             modifier = Modifier
                 .size(48.dp)
                 .background(
@@ -532,29 +527,31 @@ fun AlternativeLoginContainer(
                     top.linkTo(alternativeLoginTitle.bottom, spacing_6)
                 }
         )
-        FacebookButton(onAuthComplete = { }, onAuthError = {
-
-        }, modifier = Modifier
-            .size(48.dp)
-            .background(
-                Color.White,
-                MaterialTheme.shapes.large
-            )
-            .padding(horizontal = 8.dp, vertical = 6.dp)
-            .constrainAs(facebookLogin) {
-                linkTo(
-                    start = appleLogin.end,
-                    startMargin = spacing_1,
-                    end = googleLogin.start,
-                    endMargin = spacing_1
+        CustomFacebookButton(
+            loginFacebook = {
+                loginFacebook(it)
+            },
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    Color.White,
+                    MaterialTheme.shapes.large
                 )
-                top.linkTo(alternativeLoginTitle.bottom, spacing_6)
-            }
+                .padding(horizontal = 8.dp, vertical = 6.dp)
+                .constrainAs(facebookLogin) {
+                    linkTo(
+                        start = appleLogin.end,
+                        startMargin = spacing_1,
+                        end = googleLogin.start,
+                        endMargin = spacing_1
+                    )
+                    top.linkTo(alternativeLoginTitle.bottom, spacing_6)
+                }
         )
 
         Image(
             painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_google_logo_27_27),
-            contentDescription = "Logo",
+            contentDescription = stringResource(id = com.carlosgub.globant.resources.R.string.login_google_logo),
             modifier = Modifier
                 .size(48.dp)
                 .clickable { googleClick() }
@@ -584,11 +581,12 @@ fun SignUpContainer(
     ConstraintLayout(
         modifier
             .fillMaxWidth()
+            .semantics { testTag = "login_sign_in_button" }
             .clickable {
                 onClick()
             }) {
         val (firstText, spacer, secondText) = createRefs()
-        Text(text = "¿No tenes cuenta?",
+        Text(text = stringResource(id = com.carlosgub.globant.resources.R.string.login_signup_first_text),
             style = TextStyle(
                 color = Color.Black,
                 fontSize = 16.sp,
@@ -603,7 +601,8 @@ fun SignUpContainer(
                 top.linkTo(parent.top)
             }
         )
-        Spacer(modifier = Modifier
+        Spacer(
+            modifier = Modifier
             .size(4.dp)
             .constrainAs(spacer) {
                 linkTo(
@@ -613,95 +612,39 @@ fun SignUpContainer(
                 top.linkTo(parent.top)
             })
 
-        Text(text = "Regístrate",
+        Text(
+            text = stringResource(id = com.carlosgub.globant.resources.R.string.login_signup_second_text),
             style = TextStyle(
                 color = Color.Black,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic
             ),
-            modifier = Modifier.constrainAs(secondText) {
-                linkTo(
-                    start = spacer.start,
-                    end = parent.end
-                )
-                top.linkTo(parent.top)
-            })
+            modifier = Modifier
+                .constrainAs(secondText) {
+                    linkTo(
+                        start = spacer.start,
+                        end = parent.end
+                    )
+                    top.linkTo(parent.top)
+                }
+        )
         createHorizontalChain(firstText, spacer, secondText, chainStyle = ChainStyle.Packed)
     }
 }
 
 @Composable
-fun rememberFirebaseAuthLauncher(
-    showLoading: () -> Unit,
-    onAuthComplete: () -> Unit,
-    onAuthError: (ApiException) -> Unit
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete()
-            }
-        } catch (e: ApiException) {
-            onAuthError(e)
-        }
-    }
-}
-
-@Composable
-fun FacebookButton(
-    onAuthComplete: () -> Unit,
-    onAuthError: (Exception) -> Unit,
+fun CustomFacebookButton(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    loginFacebook: (LoginResult) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val loginManager = LoginManager.getInstance()
-    val callbackManager = remember { CallbackManager.Factory.create() }
-    val launcher = rememberLauncherForActivityResult(
-        loginManager.createLogInActivityResultContract(callbackManager, null)
-    ) {
-        // nothing to do. handled in FacebookCallback
-    }
-
-    DisposableEffect(Unit) {
-        loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
-            override fun onCancel() {
-                // do nothing
-            }
-
-            override fun onError(error: FacebookException) {
-                onAuthError(error)
-            }
-
-            override fun onSuccess(result: LoginResult) {
-                scope.launch {
-                    val token = result.accessToken.token
-                    val credential = FacebookAuthProvider.getCredential(token)
-                    val authResult = Firebase.auth.signInWithCredential(credential).await()
-                    if (authResult.user != null) {
-                        onAuthComplete()
-                    } else {
-                        onAuthError(IllegalStateException("Unable to sign in with Facebook"))
-                    }
-                }
-            }
-        })
-
-        onDispose {
-            loginManager.unregisterCallback(callbackManager)
+    AndroidView(
+        modifier = modifier,
+        factory = ::LoginButton,
+        update = { button ->
+            button.setPermissions("email")
+            button.isEnabled = enabled
         }
-    }
-    Image(
-        painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_fb_logo_27_27),
-        contentDescription = "Logo",
-        modifier = modifier
-            .clickable {
-                launcher.launch(listOf("email", "public_profile"))
-            }
     )
 }

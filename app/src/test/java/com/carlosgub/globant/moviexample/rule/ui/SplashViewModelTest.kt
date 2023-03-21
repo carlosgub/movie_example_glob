@@ -1,18 +1,17 @@
-package com.example.moviejetpackcompose.ui.features.movie
+package com.carlosgub.globant.moviexample.rule.ui
 
 import app.cash.turbine.test
-import com.example.moviejetpackcompose.core.DispatcherProvider
-import com.example.moviejetpackcompose.core.sealed.GenericState
-import com.example.moviejetpackcompose.helpers.TestDispatcherProvider
-import com.example.moviejetpackcompose.helpers.movieModel
-import com.example.moviejetpackcompose.model.usecase.GetNowPlayingMoviesUseCase
-import com.example.moviejetpackcompose.ui.features.model.MovieModel
+import com.carlosgub.globant.core.commons.DispatcherProvider
+import com.carlosgub.globant.core.commons.sealed.GenericState
+import com.carlosgub.globant.moviexample.model.usecase.IsUserLoggedUseCase
+import com.carlosgub.globant.moviexample.rule.helpers.TestDispatcherProvider
+import com.carlosgub.globant.moviexample.ui.SplashViewModel
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -23,7 +22,7 @@ import org.junit.runners.JUnit4
 
 @ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
-class MovieViewModelTest {
+class SplashViewModelTest {
 
     @get:Rule
     val mockkRule = MockKRule(this)
@@ -31,62 +30,39 @@ class MovieViewModelTest {
     private val dispatcherProvider: DispatcherProvider = TestDispatcherProvider()
 
     @MockK
-    lateinit var getNowPlayingMoviesUseCase: GetNowPlayingMoviesUseCase
+    lateinit var isUserLoggedUseCase: IsUserLoggedUseCase
 
     @Test
-    fun `get recent movies successfully`() = runTest {
-        val list = listOf(
-            movieModel
-        )
+    fun `the user is not logged`() = runTest {
 
         every {
-            getNowPlayingMoviesUseCase.invoke()
+            isUserLoggedUseCase()
         }.returns(
-            flowOf(list)
+            flowOf(false)
         )
         val viewModel =
-            MovieViewModel(getNowPlayingMoviesUseCase, dispatcherProvider)
+            SplashViewModel(isUserLoggedUseCase, dispatcherProvider)
         viewModel.uiState.test {
-            assertEquals(GenericState.Success(list), awaitItem())
+            delay(2000)
+            assertEquals(GenericState.Success(false), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
-        verify { getNowPlayingMoviesUseCase.invoke() }
+        verify { isUserLoggedUseCase.invoke() }
     }
 
     @Test
-    fun `get recent movies empty list`() = runTest {
-        val list = listOf<MovieModel>()
-
+    fun `the usser is logged`() = runTest {
         every {
-            getNowPlayingMoviesUseCase.invoke()
+            isUserLoggedUseCase()
         }.returns(
-            flowOf(list)
+            flowOf(true)
         )
         val viewModel =
-            MovieViewModel(getNowPlayingMoviesUseCase, dispatcherProvider)
+            SplashViewModel(isUserLoggedUseCase, dispatcherProvider)
         viewModel.uiState.test {
-            assertEquals(GenericState.Success(list), awaitItem())
+            assertEquals(GenericState.Success(true), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
-        verify { getNowPlayingMoviesUseCase.invoke() }
-    }
-
-    @Test
-    fun `get recent movies error`() = runTest {
-        val message = "Error"
-        every {
-            getNowPlayingMoviesUseCase.invoke()
-        }.returns(
-            flow {
-                throw IllegalStateException(message)
-            }
-        )
-        val viewModel =
-            MovieViewModel(getNowPlayingMoviesUseCase, dispatcherProvider)
-        viewModel.uiState.test {
-            assertEquals(GenericState.Error(message), awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-        verify { getNowPlayingMoviesUseCase.invoke() }
+        verify { isUserLoggedUseCase.invoke() }
     }
 }

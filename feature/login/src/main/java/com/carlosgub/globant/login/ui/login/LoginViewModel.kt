@@ -9,6 +9,10 @@ import com.carlosgub.globant.core.commons.DispatcherProvider
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.login.model.usecase.LoginAnonymouslyUseCase
 import com.carlosgub.globant.login.model.usecase.LoginWithEmailAndPasswordUseCase
+import com.carlosgub.globant.login.model.usecase.LoginWithFacebookUseCase
+import com.carlosgub.globant.login.model.usecase.LoginWithGoogleUseCase
+import com.facebook.AccessToken
+import com.google.firebase.auth.AuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +25,8 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginAnonymouslyUseCase: LoginAnonymouslyUseCase,
     private val loginWithEmailAndPasswordUseCase: LoginWithEmailAndPasswordUseCase,
+    private val loginWithFacebookUseCase: LoginWithFacebookUseCase,
+    private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
@@ -96,14 +102,52 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun showLoading() {
-        _uiState.value = GenericState.Loading
-    }
-
     fun clearState() {
         _isLoginEnabled.value = false
         _passwordField.value = ""
         _emailField.value = ""
         _uiState.value = GenericState.None
+    }
+
+    fun signWithGoogle(credential: AuthCredential) = viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.main) {
+            _uiState.value = GenericState.Loading
+            loginWithGoogleUseCase(
+                credential
+            )
+                .flowOn(dispatcherProvider.io)
+                .catch {
+                    _uiState.value = GenericState.Error(it.message.orEmpty())
+                }
+                .collect {
+                    if (it) {
+                        _uiState.value = GenericState.Success(it)
+                    } else {
+                        _uiState.value =
+                            GenericState.Error("El usuario o la contraseña estan incorrectos")
+                    }
+                }
+        }
+    }
+
+    fun signWithFacebook(credential: AccessToken) = viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.main) {
+            _uiState.value = GenericState.Loading
+            loginWithFacebookUseCase(
+                credential
+            )
+                .flowOn(dispatcherProvider.io)
+                .catch {
+                    _uiState.value = GenericState.Error(it.message.orEmpty())
+                }
+                .collect {
+                    if (it) {
+                        _uiState.value = GenericState.Success(it)
+                    } else {
+                        _uiState.value =
+                            GenericState.Error("El usuario o la contraseña estan incorrectos")
+                    }
+                }
+        }
     }
 }

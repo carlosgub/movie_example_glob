@@ -1,5 +1,8 @@
 package com.carlosgub.globant.login.data.firebase
 
+import com.facebook.AccessToken
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -29,19 +32,22 @@ class FirebaseLogin @Inject constructor(
         }
     }
 
-    /*
-    fun recoverPassword(email: String): Completable {
-        return Completable.create { completable ->
-            if (isConnected(completable)) {
-                auth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            completable.onComplete()
-                        } else {
-                            completable.onError(Throwable(RECOVER_PASSWORD_ERROR_FIREBASE))
-                        }
-                    }
-            }
+    suspend fun logInWithGoogle(credential: AuthCredential): Boolean {
+        return try {
+            auth.signInWithCredential(credential).await()
+            true
+        } catch (e: Exception) {
+            false
         }
-    }*/
+    }
+
+    suspend fun logInWithFacebook(credential: AccessToken): Boolean {
+        val facebookCredential = FacebookAuthProvider.getCredential(credential.token)
+        return try {
+            auth.signInWithCredential(facebookCredential).await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
