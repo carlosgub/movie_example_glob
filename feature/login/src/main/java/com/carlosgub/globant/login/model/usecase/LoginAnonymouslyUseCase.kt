@@ -7,7 +7,7 @@ import javax.inject.Inject
 class LoginAnonymouslyUseCase @Inject constructor(
     private val loginRepository: LoginRepository
 ) {
-    suspend operator fun invoke() = flow {
+    operator fun invoke() = flow {
         emit(loginRepository.signInAnonymously())
     }
 

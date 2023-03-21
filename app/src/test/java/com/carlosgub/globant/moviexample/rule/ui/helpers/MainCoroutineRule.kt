@@ -1,4 +1,4 @@
-package com.carlosgub.globant.moviexample.rule
+package com.carlosgub.globant.moviexample.rule.ui.helpers
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestCoroutineDispatcher

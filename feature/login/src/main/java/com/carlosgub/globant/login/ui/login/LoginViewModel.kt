@@ -102,13 +102,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun clearState() {
-        _isLoginEnabled.value = false
-        _passwordField.value = ""
-        _emailField.value = ""
-        _uiState.value = GenericState.None
-    }
-
     fun signWithGoogle(credential: AuthCredential) = viewModelScope.launch {
         viewModelScope.launch(dispatcherProvider.main) {
             _uiState.value = GenericState.Loading
@@ -149,5 +142,12 @@ class LoginViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun clearState() {
+        _isLoginEnabled.value = false
+        _passwordField.value = ""
+        _emailField.value = ""
+        _uiState.value = GenericState.None
     }
 }

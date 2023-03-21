@@ -8,7 +8,7 @@ import javax.inject.Inject
 class LoginWithFacebookUseCase @Inject constructor(
     private val loginRepository: LoginRepository
 ) {
-    suspend operator fun invoke(accessToken: AccessToken) = flow {
+    operator fun invoke(accessToken: AccessToken) = flow {
         emit(loginRepository.signInWithFacebook(accessToken))
     }
 

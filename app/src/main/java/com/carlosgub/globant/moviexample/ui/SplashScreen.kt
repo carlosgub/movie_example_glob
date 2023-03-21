@@ -22,6 +22,7 @@ import com.carlosgub.globant.core.commons.helpers.showError
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.theme.theme.PrimaryColor
 import com.carlosgub.globant.theme.theme.spacing_10
+import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
@@ -43,6 +44,10 @@ fun SplashScreen(
             }
         }
     )
+    LaunchedEffect(Unit){
+        delay(1500)
+        viewModel.isUserLogged()
+    }
     val isUserLogged = getDataFromUiState(uiState)
     if (isUserLogged == true) {
         LaunchedEffect(Unit) {

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class LoginWithEmailAndPasswordUseCase @Inject constructor(
     private val loginRepository: LoginRepository
 ) {
-    suspend operator fun invoke(email: String, password: String) = flow {
+    operator fun invoke(email: String, password: String) = flow {
         emit(loginRepository.signInWithEmailAndPassword(email, password))
     }
 

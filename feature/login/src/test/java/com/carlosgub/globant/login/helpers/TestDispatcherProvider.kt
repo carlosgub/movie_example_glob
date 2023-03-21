@@ -1,4 +1,4 @@
-package com.carlosgub.globant.moviexample.rule.helpers
+package com.carlosgub.globant.login.helpers
 
 import com.carlosgub.globant.core.commons.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher

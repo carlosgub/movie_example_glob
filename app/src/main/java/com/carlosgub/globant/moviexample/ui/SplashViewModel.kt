@@ -23,14 +23,8 @@ class SplashViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<GenericState<Boolean>>(GenericState.None)
     val uiState: StateFlow<GenericState<Boolean>> = _uiState
 
-    init {
-        _uiState.value = GenericState.None
-        isUserLogged()
-    }
-
-    private fun isUserLogged() {
+    fun isUserLogged() {
         viewModelScope.launch(dispatcherProvider.main) {
-            delay(1500)
             isUserLoggedUseCase()
                 .flowOn(dispatcherProvider.io)
                 .catch {

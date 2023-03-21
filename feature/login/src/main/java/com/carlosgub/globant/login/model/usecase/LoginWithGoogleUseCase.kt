@@ -8,7 +8,7 @@ import javax.inject.Inject
 class LoginWithGoogleUseCase @Inject constructor(
     private val loginRepository: LoginRepository
 ) {
-    suspend operator fun invoke(authCredential: AuthCredential) = flow {
+    operator fun invoke(authCredential: AuthCredential) = flow {
         emit(loginRepository.signInWithGoogle(authCredential))
     }
 
