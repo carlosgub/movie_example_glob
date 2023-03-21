@@ -121,7 +121,6 @@ fun HomeScreen(
             }
         }
     )
-    viewModel.getMoviesCache()
     val data = getDataFromUiState(uiStateSignOut)
     if (data == true) {
         viewModel.clearState()
@@ -137,6 +136,9 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
+        LaunchedEffect("cache movies") {
+            viewModel.getMoviesCache()
+        }
         val (searchBar, searchContent, fab) = createRefs()
         SearchTextField(
             queryValue = queryValue,

@@ -111,6 +111,7 @@ class HomeViewModel @Inject constructor(
 
     fun clearState() {
         _query.value = ""
+        _uiState.value = GenericState.None
         _uiStateSignOut.value = GenericState.None
     }
 

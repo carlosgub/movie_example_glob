@@ -3,6 +3,8 @@ package com.carlosgub.globant.core.commons.views
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -23,5 +25,6 @@ fun Loading(
         composition = composition,
         progress = { progressLottie },
         modifier = modifier
+            .semantics { testTag = "loading" }
     )
 }

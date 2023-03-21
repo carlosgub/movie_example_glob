@@ -196,6 +196,7 @@ fun LoginScreen(
                 viewModel.usernameFieldChange(it)
             },
             modifier = Modifier
+                .semantics { testTag = "login_email" }
                 .constrainAs(userTextField) {
                     linkTo(
                         start = parent.start,
@@ -236,6 +237,7 @@ fun LoginScreen(
                 viewModel.passwordFieldChange(it)
             },
             modifier = Modifier
+                .semantics { testTag = "login_password" }
                 .constrainAs(passwordTextField) {
                     linkTo(
                         start = parent.start,

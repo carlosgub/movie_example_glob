@@ -35,13 +35,14 @@ class ComposeMainActivity(semanticsProvider: SemanticsNodeInteractionsProvider) 
         semanticsProvider = semanticsProvider,
     ) {
     val imdbLogoImage: KNode = child { hasTestTag("splash_screen_image") }
-    val emailFieldText: KNode = child { hasTestTag("login_email") }
-    val passwordFieldText: KNode = child { hasTestTag("login_password") }
+    val logInEmailTextField: KNode = child { hasTestTag("login_email") }
+    val logInPasswordTextField: KNode = child { hasTestTag("login_password") }
     val loginButton: KNode = child { hasTestTag("login_button") }
     val signInButton: KNode = child { hasTestTag("login_sign_in_button") }
     val homeSearchTextField: KNode = child { hasTestTag("home_search") }
     val homeList: KNode = child { hasTestTag("home_list") }
     val homeSignOut: KNode = child { hasTestTag("home_sign_out") }
+    val loading: KNode = child { hasTestTag("loading") }
     val signUpNameTextField: KNode = child { hasTestTag("sign_up_name") }
     val signUpEmailTextField: KNode = child { hasTestTag("sign_up_email") }
     val signUpPasswordTextField: KNode = child { hasTestTag("sign_up_password") }
@@ -58,9 +59,9 @@ class ExampleInstrumentedTest : TestCase(
     private val badEmail = "$randomString@example"
     private val goodEmail = "$badEmail.com"
     private val goodPassword = "123123aA@"
+    private val emailToLogin = "carlos@gmail.com"
+    private val passwordToLogin = "123123123"
     private val badPassword1 = "123qweASD"
-    private val badPassword2 = "123qwe!@"
-    private val badPassword3 = "12345678910"
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -71,104 +72,34 @@ class ExampleInstrumentedTest : TestCase(
     )
 
     @Test
+    fun loginWithUserAndPassword() = run {
+        testSplashScreen()
+        testSuccessLoginWithEmailAndPassword()
+        testHomeScreen()
+    }
+
+    @Test
+    fun loginWithWrongUserAndPassword() = run {
+        testSplashScreen()
+        testSuccessLoginWithWrongEmailAndPassword()
+        testHomeScreenNotDisplayed()
+    }
+
+    @Test
     fun registerNewUser() = run {
         testSplashScreen()
         testSuccessRegisterScreen()
         testHomeScreen()
     }
 
-    /*step("Open Login screen & fill fields to sign in") {
-        onComposeScreen<ComposeMainActivity>(composeTestRule) {
-            emailFieldText {
-                assertIsDisplayed()
-                performTextInput(goodEmail)
-            }
-            passwordFieldText {
-                assertIsDisplayed()
-                performTextInput(goodPassword)
-            }
-            performCloseSoftKeyBoard()
-            loginButton {
-                assertIsDisplayed()
-                assertTextEquals(getResourceString(R.string.login))
-                performClick()
-            }
-        }
-    }*/
-
-    /*@Test
-    fun wrongEmailWorkflow() = run {
-        step("Trying to register new user with wrong email format") {
-            onComposeScreen<ComposeMainActivity>(composeTestRule) {
-                newRegisterButton {
-                    assertIsDisplayed()
-                    assertTextEquals(getResourceString(R.string.to_register))
-                    performClick()
-                }
-                nameRFieldText {
-                    assertIsDisplayed()
-                    performTextInput(username)
-                }
-                emailRFieldText {
-                    assertIsDisplayed()
-                    performTextInput(badEmail)
-                }
-                passwordRFieldText {
-                    assertIsDisplayed()
-                    performTextInput(goodPassword)
-                }
-                performCloseSoftKeyBoard()
-                registerButton {
-                    assertIsDisplayed()
-                    assertIsNotEnabled()
-                }
-            }
-        }
-    }*/
-/*
     @Test
-    fun wrongPasswordWorkflow() = run {
-        step("Trying to register new user with wrong password format") {
-            onComposeScreen<ComposeMainActivity>(composeTestRule) {
-                newRegisterButton {
-                    assertIsDisplayed()
-                    assertTextEquals(getResourceString(R.string.to_register))
-                    performClick()
-                }
-                nameRFieldText {
-                    assertIsDisplayed()
-                    performTextInput(username)
-                }
-                emailRFieldText {
-                    assertIsDisplayed()
-                    performTextInput(goodEmail)
-                }
-                passwordRFieldText {
-                    assertIsDisplayed()
-                    performTextInput(badPassword1)
-                }
-                performCloseSoftKeyBoard()
-                registerButton {
-                    assertIsDisplayed()
-                    assertIsNotEnabled()
-                }
-                passwordRFieldText { performTextReplacement(badPassword2) }
-                performCloseSoftKeyBoard()
-                registerButton { assertIsNotEnabled() }
-                passwordRFieldText { performTextReplacement(badPassword3) }
-                performCloseSoftKeyBoard()
-                registerButton { assertIsNotEnabled() }
-            }
-        }
-    }*/
-/*
-    private fun performBackAction() {
-        composeTestRule.activityRule.scenario.onActivity { activity ->
-            activity.onBackPressedDispatcher.onBackPressed()
-        }
-    }*/
+    fun registerWrongNewUser() = run {
+        testSplashScreen()
+        testWrongRegisterScreen()
+        testHomeScreenNotDisplayed()
+    }
 
-    private fun performCloseSoftKeyBoard() {
+    private fun dismissKeyboard() {
         composeTestRule.activityRule.scenario.onActivity { activity ->
             val inputMethodManager =
                 activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -180,6 +111,48 @@ class ExampleInstrumentedTest : TestCase(
         step("Open Splash screen") {
             onComposeScreen<ComposeMainActivity>(composeTestRule) {
                 imdbLogoImage { assertIsDisplayed() }
+            }
+        }
+    }
+
+    private fun TestContext<Unit>.testSuccessLoginWithEmailAndPassword() {
+        step("Open Login screen & fill fields to sign in") {
+            onComposeScreen<ComposeMainActivity>(composeTestRule) {
+                logInEmailTextField {
+                    assertIsDisplayed()
+                    performTextInput(emailToLogin)
+                }
+                logInPasswordTextField {
+                    assertIsDisplayed()
+                    performTextInput(passwordToLogin)
+                }
+                dismissKeyboard()
+                loginButton {
+                    assertIsDisplayed()
+                    assertTextEquals(getResourceString(com.carlosgub.globant.resources.R.string.login_login))
+                    performClick()
+                }
+            }
+        }
+    }
+
+    private fun TestContext<Unit>.testSuccessLoginWithWrongEmailAndPassword() {
+        step("Open Login screen & fill fields to sign in") {
+            onComposeScreen<ComposeMainActivity>(composeTestRule) {
+                logInEmailTextField {
+                    assertIsDisplayed()
+                    performTextInput(emailToLogin)
+                }
+                logInPasswordTextField {
+                    assertIsDisplayed()
+                    performTextInput(badPassword1)
+                }
+                dismissKeyboard()
+                loginButton {
+                    assertIsDisplayed()
+                    assertTextEquals(getResourceString(com.carlosgub.globant.resources.R.string.login_login))
+                    performClick()
+                }
             }
         }
     }
@@ -210,6 +183,37 @@ class ExampleInstrumentedTest : TestCase(
                     assertIsEnabled()
                     assertTextEquals(getResourceString(com.carlosgub.globant.resources.R.string.sign_up_sign_up_button))
                     performClick()
+                    dismissKeyboard()
+                }
+            }
+        }
+    }
+
+    private fun TestContext<Unit>.testWrongRegisterScreen() {
+        step("Register new screen") {
+            onComposeScreen<ComposeMainActivity>(
+                composeTestRule
+            ) {
+                signInButton {
+                    assertIsDisplayed()
+                    performClick()
+                }
+                signUpNameTextField {
+                    assertIsDisplayed()
+                    performTextInput(username)
+                }
+                signUpEmailTextField {
+                    assertIsDisplayed()
+                    performTextInput(goodEmail)
+                }
+                signUpPasswordTextField {
+                    assertIsDisplayed()
+                    performTextInput(badPassword1)
+                }
+                signUpSignUpButton {
+                    assertIsDisplayed()
+                    assertIsNotEnabled()
+                    assertTextEquals(getResourceString(com.carlosgub.globant.resources.R.string.sign_up_sign_up_button))
                 }
             }
         }
@@ -221,21 +225,22 @@ class ExampleInstrumentedTest : TestCase(
                 homeList {
                     assertIsDisplayed()
                     hasScrollAction()
+                    performScrollToIndex(8)
                     performScrollToIndex(0)
-                    performScrollToIndex(1)
-                    performScrollToIndex(2)
                     Thread.sleep(5000)
                 }
                 homeSearchTextField {
                     assertIsDisplayed()
                     performTextInput("marvel")
-                    performCloseSoftKeyBoard()
+                    dismissKeyboard()
+                }
+                loading {
+                    assertIsDisplayed()
                     Thread.sleep(5000)
                 }
                 homeList {
+                    performScrollToIndex(8)
                     performScrollToIndex(0)
-                    performScrollToIndex(1)
-                    performScrollToIndex(2)
                     Thread.sleep(5000)
                 }
                 homeSignOut {
@@ -245,6 +250,16 @@ class ExampleInstrumentedTest : TestCase(
                 loginButton {
                     assertIsDisplayed()
                     Thread.sleep(5000)
+                }
+            }
+        }
+    }
+
+    private fun TestContext<Unit>.testHomeScreenNotDisplayed() {
+        step("Open Home screen") {
+            onComposeScreen<ComposeMainActivity>(composeTestRule) {
+                homeList {
+                    assertIsNotDisplayed()
                 }
             }
         }
