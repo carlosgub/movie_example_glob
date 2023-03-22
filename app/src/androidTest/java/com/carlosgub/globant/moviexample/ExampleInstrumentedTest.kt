@@ -40,6 +40,7 @@ class ComposeMainActivity(semanticsProvider: SemanticsNodeInteractionsProvider) 
     val signInButton: KNode = child { hasTestTag("login_sign_in_button") }
     val homeSearchTextField: KNode = child { hasTestTag("home_search") }
     val homeList: KNode = child { hasTestTag("home_lazy_column") }
+    val homeNoMovies: KNode = child { hasTestTag("home_no_movies") }
     val homeSignOut: KNode = child { hasTestTag("home_sign_out") }
     val loading: KNode = child { hasTestTag("loading") }
     val signUpNameTextField: KNode = child { hasTestTag("sign_up_name") }
@@ -75,6 +76,13 @@ class ExampleInstrumentedTest : TestCase(
     fun loginWithUserAndPassword() = run {
         testSuccessLoginWithEmailAndPassword()
         testHomeScreen()
+    }
+
+
+    @Test
+    fun testNoMoviesFound() = run {
+        testSuccessLoginWithEmailAndPassword()
+        testNoMoviesHomeScreen()
     }
 
     @Test
@@ -263,6 +271,32 @@ class ExampleInstrumentedTest : TestCase(
                     performScrollToIndex(8)
                     Thread.sleep(5000)
                     performScrollToIndex(0)
+                }
+                homeSignOut {
+                    performClick()
+                    Thread.sleep(5000)
+                }
+                loginButton {
+                    assertIsDisplayed()
+                    Thread.sleep(5000)
+                }
+            }
+        }
+    }
+
+    private fun TestContext<Unit>.testNoMoviesHomeScreen() {
+        step("Open Home screen") {
+            onComposeScreen<ComposeMainActivity>(composeTestRule) {
+                homeSearchTextField {
+                    assertIsDisplayed()
+                    performTextInput("globant globant globant")
+                    dismissKeyboard()
+                }
+                loading {
+                    assertIsDisplayed()
+                }
+                homeNoMovies {
+                    assertIsDisplayed()
                 }
                 homeSignOut {
                     performClick()

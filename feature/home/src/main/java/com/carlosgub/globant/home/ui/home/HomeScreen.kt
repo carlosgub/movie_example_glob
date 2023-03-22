@@ -481,7 +481,8 @@ fun MovieBookedItem(
 fun ShowNoMoviesFound(
     modifier: Modifier = Modifier
 ) {
-    ConstraintLayout(modifier = modifier) {
+    ConstraintLayout(modifier = modifier
+        .testTag("home_no_movies")) {
         val (lottie, spacer, text) = createRefs()
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(com.carlosgub.globant.resources.R.raw.no_found))
         val progressLottie by animateLottieCompositionAsState(
@@ -520,7 +521,7 @@ fun ShowNoMoviesFound(
         )
         Text(
             text = "No Movies Found",
-            color = Color.White,
+            style = MaterialTheme.typography.body1,
             modifier = Modifier
                 .constrainAs(text) {
                     linkTo(
