@@ -45,7 +45,6 @@ class HomeViewModel @Inject constructor(
     val uiStateSignOut: StateFlow<GenericState<Boolean>> = _uiStateSignOut
 
     init {
-        _uiStateSignOut.value = GenericState.None
         search()
     }
 

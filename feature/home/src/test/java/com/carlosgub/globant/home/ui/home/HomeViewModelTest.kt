@@ -3,6 +3,7 @@ package com.carlosgub.globant.home.ui.home
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.carlosgub.globant.core.commons.DispatcherProvider
+import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.home.helpers.MainCoroutineRule
 import com.carlosgub.globant.home.helpers.TestDispatcherProvider
@@ -15,10 +16,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -54,10 +54,10 @@ class HomeViewModelTest {
     private val message = "Error"
 
     @Test
-    fun `login Anonymously success`() = runBlocking {
+    fun `get Movies from cache success`() = runBlocking {
         val list = listOf(movieModel)
         every {
-            getMoviesFromQueryUseCase.invoke(any())
+            getMoviesFromCacheUseCase.invoke()
         }.returns(
             flowOf(list)
         )
@@ -69,11 +69,134 @@ class HomeViewModelTest {
                 dispatcherProvider
             )
 
-        viewModel.queryFieldChange("agua")
+        viewModel.getMoviesCache()
         viewModel.uiState.test {
-            assertEquals(GenericState.Loading, awaitItem())
+            assertEquals(GenericState.Success(list), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
-        verify { getMoviesFromQueryUseCase.invoke(any()) }
+        verify { getMoviesFromCacheUseCase.invoke() }
+    }
+
+    @Test
+    fun `get Movies from cache empty`() = runBlocking {
+        val list = listOf<MovieModel>()
+        every {
+            getMoviesFromCacheUseCase.invoke()
+        }.returns(
+            flowOf(list)
+        )
+        val viewModel =
+            HomeViewModel(
+                getMoviesFromQueryUseCase,
+                getMoviesFromCacheUseCase,
+                signOutUseCase,
+                dispatcherProvider
+            )
+
+        viewModel.getMoviesCache()
+        viewModel.uiState.test {
+            assertEquals(GenericState.Success(list), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { getMoviesFromCacheUseCase.invoke() }
+    }
+
+    @Test
+    fun `get Movies from cache error`() = runBlocking {
+        every {
+            getMoviesFromCacheUseCase.invoke()
+        }.returns(
+            flow {
+                throw IllegalStateException(message)
+            }
+        )
+        val viewModel =
+            HomeViewModel(
+                getMoviesFromQueryUseCase,
+                getMoviesFromCacheUseCase,
+                signOutUseCase,
+                dispatcherProvider
+            )
+
+        viewModel.getMoviesCache()
+        viewModel.uiState.test {
+            assertEquals(GenericState.Error(message), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { getMoviesFromCacheUseCase.invoke() }
+    }
+
+    @Test
+    fun `sign out success`() = runBlocking {
+        every {
+            signOutUseCase.invoke()
+        }.returns(
+            flowOf(true)
+        )
+        val viewModel =
+            HomeViewModel(
+                getMoviesFromQueryUseCase,
+                getMoviesFromCacheUseCase,
+                signOutUseCase,
+                dispatcherProvider
+            )
+
+        viewModel.signOut()
+        viewModel.uiStateSignOut.test {
+            assertEquals(GenericState.Success(true), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { signOutUseCase.invoke() }
+    }
+
+    @Test
+    fun `sign out error`() = runBlocking {
+        every {
+            signOutUseCase.invoke()
+        }.returns(
+            flowOf(false)
+        )
+        val viewModel =
+            HomeViewModel(
+                getMoviesFromQueryUseCase,
+                getMoviesFromCacheUseCase,
+                signOutUseCase,
+                dispatcherProvider
+            )
+
+        viewModel.signOut()
+        viewModel.uiStateSignOut.test {
+            assertEquals(
+                GenericState.Error("Hubo un problema al querer hacer el logout"),
+                awaitItem()
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { signOutUseCase.invoke() }
+    }
+
+    @Test
+    fun `sign out error throw`() = runBlocking {
+        every {
+            signOutUseCase.invoke()
+        }.returns(
+            flow {
+                throw IllegalStateException(message)
+            }
+        )
+        val viewModel =
+            HomeViewModel(
+                getMoviesFromQueryUseCase,
+                getMoviesFromCacheUseCase,
+                signOutUseCase,
+                dispatcherProvider
+            )
+
+        viewModel.signOut()
+        viewModel.uiStateSignOut.test {
+            assertEquals(GenericState.Error(message), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        verify { signOutUseCase.invoke() }
     }
 }
