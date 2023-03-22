@@ -44,9 +44,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -64,9 +63,9 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.carlosgub.globant.core.commons.helpers.ShowErrorUiState
 import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
 import com.carlosgub.globant.core.commons.helpers.getImagePath
-import com.carlosgub.globant.core.commons.helpers.showError
 import com.carlosgub.globant.core.commons.helpers.showLoading
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
@@ -77,6 +76,7 @@ import com.carlosgub.globant.theme.theme.TextFieldBackgroundColor
 import com.carlosgub.globant.theme.theme.TextFieldStyle
 import com.carlosgub.globant.theme.theme.TextFieldTextColor
 import com.carlosgub.globant.theme.theme.spacing_1
+import com.carlosgub.globant.theme.theme.spacing_10
 import com.carlosgub.globant.theme.theme.spacing_2
 import com.carlosgub.globant.theme.theme.spacing_3
 import com.carlosgub.globant.theme.theme.spacing_4
@@ -128,9 +128,6 @@ fun HomeScreen(
             signOut()
         }
     }
-    val context = LocalContext.current
-    showError(uiState, context)
-    showError(uiStateSignOut, context)
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -139,7 +136,7 @@ fun HomeScreen(
         LaunchedEffect("cache movies") {
             viewModel.getMoviesCache()
         }
-        val (searchBar, searchContent, fab) = createRefs()
+        val (searchBar, searchContent, fab, error) = createRefs()
         SearchTextField(
             queryValue = queryValue,
             keyboardController = keyboardController,
@@ -147,7 +144,7 @@ fun HomeScreen(
                 viewModel.queryFieldChange(it)
             },
             modifier = Modifier
-                .semantics { testTag = "home_search" }
+                .testTag("home_search")
                 .constrainAs(searchBar) {
                     linkTo(
                         start = parent.start,
@@ -182,12 +179,42 @@ fun HomeScreen(
             onClick = {
                 viewModel.signOut()
             }, modifier = Modifier
-                .semantics { testTag = "home_sign_out" }
+                .testTag("home_sign_out")
                 .constrainAs(fab) {
                     end.linkTo(parent.end, spacing_6)
                     bottom.linkTo(parent.bottom, spacing_6)
                     height = Dimension.wrapContent
                     width = Dimension.wrapContent
+                }
+        )
+        ShowErrorUiState(
+            uiState,
+            modifier = Modifier
+                .testTag("home_error")
+                .constrainAs(error) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        end = parent.end,
+                        endMargin = spacing_10
+                    )
+                    bottom.linkTo(parent.bottom, spacing_4)
+                    width = Dimension.fillToConstraints
+                }
+        )
+        ShowErrorUiState(
+            uiStateSignOut,
+            modifier = Modifier
+                .testTag("home_error")
+                .constrainAs(error) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        end = parent.end,
+                        endMargin = spacing_10
+                    )
+                    bottom.linkTo(parent.bottom, spacing_4)
+                    width = Dimension.fillToConstraints
                 }
         )
     }
@@ -337,7 +364,7 @@ fun LazyVerticalMovies(
 ) {
     LazyColumn(
         modifier = modifier
-            .semantics { testTag = "home_list" }
+            .testTag("home_lazy_column")
             .padding(horizontal = spacing_6),
         contentPadding = contentPaddingValues,
         state = state

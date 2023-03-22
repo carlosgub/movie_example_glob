@@ -2,6 +2,7 @@
 
 package com.carlosgub.globant.login.ui.login
 
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,10 +44,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -64,8 +64,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.carlosgub.globant.core.commons.helpers.ShowErrorUiState
 import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
-import com.carlosgub.globant.core.commons.helpers.showError
 import com.carlosgub.globant.core.commons.helpers.showLoading
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.core.commons.views.IMDbButton
@@ -115,19 +115,7 @@ fun LoginScreen(
         }
     )
     val token = stringResource(R.string.default_web_client_id)
-    // Equivalent of onActivityResult
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-                viewModel.signWithGoogle(credential)
-            } catch (e: ApiException) {
-                showError(e.message.orEmpty(), context)
-            }
-        }
-    showError(uiState, context)
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -152,8 +140,20 @@ fun LoginScreen(
             alternativeLogin,
             signUpText,
             guestSignUp,
-            loading
+            loading,
+            error
         ) = createRefs()
+        val launcher =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)!!
+                    val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+                    viewModel.signWithGoogle(credential)
+                } catch (e: ApiException) {
+                    Log.d(":)", e.message.orEmpty())
+                }
+            }
         val focusManager = LocalFocusManager.current
         Image(
             painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_imdb_logo_168_84),
@@ -196,7 +196,7 @@ fun LoginScreen(
                 viewModel.usernameFieldChange(it)
             },
             modifier = Modifier
-                .semantics { testTag = "login_email" }
+                .testTag("login_email")
                 .constrainAs(userTextField) {
                     linkTo(
                         start = parent.start,
@@ -237,7 +237,7 @@ fun LoginScreen(
                 viewModel.passwordFieldChange(it)
             },
             modifier = Modifier
-                .semantics { testTag = "login_password" }
+                .testTag("login_password")
                 .constrainAs(passwordTextField) {
                     linkTo(
                         start = parent.start,
@@ -272,10 +272,10 @@ fun LoginScreen(
                 keyboardController?.hide()
                 viewModel.loginWithEmailAndPassword()
             },
+            testName = "login_button",
             isEnabled = isLoginEnabled,
             text = stringResource(id = com.carlosgub.globant.resources.R.string.login_login),
             modifier = Modifier
-                .semantics { testTag = "login_button" }
                 .constrainAs(loginButton) {
                     linkTo(
                         start = parent.start,
@@ -377,6 +377,21 @@ fun LoginScreen(
                     }
             )
         }
+        ShowErrorUiState(
+            uiState,
+            Modifier
+                .testTag("login_error")
+                .constrainAs(error) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        end = parent.end,
+                        endMargin = spacing_10
+                    )
+                    bottom.linkTo(parent.bottom, spacing_4)
+                    width = Dimension.fillToConstraints
+                }
+        )
     }
 }
 
@@ -583,7 +598,7 @@ fun SignUpContainer(
     ConstraintLayout(
         modifier
             .fillMaxWidth()
-            .semantics { testTag = "login_sign_in_button" }
+            .testTag("login_sign_in_button")
             .clickable {
                 onClick()
             }) {
@@ -605,14 +620,14 @@ fun SignUpContainer(
         )
         Spacer(
             modifier = Modifier
-            .size(4.dp)
-            .constrainAs(spacer) {
-                linkTo(
-                    start = firstText.end,
-                    end = secondText.start
-                )
-                top.linkTo(parent.top)
-            })
+                .size(4.dp)
+                .constrainAs(spacer) {
+                    linkTo(
+                        start = firstText.end,
+                        end = secondText.start
+                    )
+                    top.linkTo(parent.top)
+                })
 
         Text(
             text = stringResource(id = com.carlosgub.globant.resources.R.string.login_signup_second_text),

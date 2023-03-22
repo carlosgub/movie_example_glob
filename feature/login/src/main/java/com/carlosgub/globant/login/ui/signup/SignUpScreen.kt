@@ -35,10 +35,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -49,8 +48,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.carlosgub.globant.core.commons.helpers.ShowErrorUiState
 import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
-import com.carlosgub.globant.core.commons.helpers.showError
 import com.carlosgub.globant.core.commons.helpers.showLoading
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.core.commons.views.IMDbButton
@@ -101,8 +100,6 @@ fun SignupScreen(
             goToHome()
         }
     }
-    val context = LocalContext.current
-    showError(uiState, context)
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -118,7 +115,8 @@ fun SignupScreen(
             passwordTextField,
             hintPasswordText,
             signupButton,
-            loading
+            loading,
+            error
         ) = createRefs()
         Image(
             painter = painterResource(id = R.drawable.ic_arrow_back_24_24),
@@ -171,7 +169,7 @@ fun SignupScreen(
                 focusManager.moveFocus(FocusDirection.Down)
             },
             modifier = Modifier
-                .semantics { testTag = "sign_up_name" }
+                .testTag("sign_up_name")
                 .constrainAs(nameTextField) {
                     linkTo(
                         start = parent.start,
@@ -191,7 +189,7 @@ fun SignupScreen(
                 focusManager.moveFocus(FocusDirection.Next)
             },
             modifier = Modifier
-                .semantics { testTag = "sign_up_email" }
+                .testTag("sign_up_email")
                 .constrainAs(emailTextField) {
                     linkTo(
                         start = parent.start,
@@ -215,7 +213,7 @@ fun SignupScreen(
                 }
             },
             modifier = Modifier
-                .semantics { testTag = "sign_up_password" }
+                .testTag("sign_up_password")
                 .constrainAs(passwordTextField) {
                     linkTo(
                         start = parent.start,
@@ -249,20 +247,20 @@ fun SignupScreen(
             onClick = {
                 viewModel.signUp()
             },
+            testName = "sign_up_button",
             isEnabled = isSignupEnabled,
             text = stringResource(id = R.string.sign_up_sign_up_button),
             modifier = Modifier
-                .semantics { testTag = "sign_up_sign_up_button" }
                 .constrainAs(signupButton) {
-                linkTo(
-                    start = parent.start,
-                    startMargin = spacing_6,
-                    endMargin = spacing_6,
-                    end = parent.end
-                )
-                top.linkTo(hintPasswordText.bottom, spacing_4)
-                width = Dimension.fillToConstraints
-            }
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_6,
+                        endMargin = spacing_6,
+                        end = parent.end
+                    )
+                    top.linkTo(hintPasswordText.bottom, spacing_4)
+                    width = Dimension.fillToConstraints
+                }
         )
         if (showLoading(uiState)) {
             Loading(
@@ -286,6 +284,21 @@ fun SignupScreen(
                     }
             )
         }
+        ShowErrorUiState(
+            uiState,
+            Modifier
+                .testTag("sign_up_error")
+                .constrainAs(error) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        end = parent.end,
+                        endMargin = spacing_10
+                    )
+                    bottom.linkTo(parent.bottom, spacing_4)
+                    width = Dimension.fillToConstraints
+                }
+        )
     }
 }
 

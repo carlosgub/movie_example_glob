@@ -1,8 +1,26 @@
 package com.carlosgub.globant.core.commons.helpers
 
-import android.content.Context
-import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Card
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.carlosgub.globant.core.commons.sealed.GenericState
+import com.carlosgub.globant.theme.theme.spacing_1
+import com.carlosgub.globant.theme.theme.spacing_2
+import com.carlosgub.globant.theme.theme.spacing_25
+import kotlinx.coroutines.delay
 
 fun <T> showLoading(
     uiState: GenericState<T>
@@ -13,18 +31,57 @@ fun <T> showLoading(
     is GenericState.Success -> false
 }
 
-fun <T> showError(
+@Composable
+fun <T> ShowErrorUiState(
     uiState: GenericState<T>,
-    context: Context
-): Unit = when (uiState) {
-    is GenericState.Error -> Toast.makeText(context, uiState.message, Toast.LENGTH_SHORT).show()
-    else -> Unit
+    modifier: Modifier = Modifier
+) {
+    if (uiState is GenericState.Error) {
+        var isButtonVisible by remember { mutableStateOf(true) }
+        var secondsToDisappear by remember { mutableStateOf(5) }
+        AnimatedVisibility(
+            isButtonVisible,
+            modifier = modifier
+                .shadow(elevation = spacing_25)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+                    val (text) = createRefs()
+                    Text(
+                        text = uiState.message,
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .constrainAs(text) {
+                                linkTo(
+                                    start = parent.start,
+                                    startMargin = spacing_2,
+                                    end = parent.end,
+                                    endMargin = spacing_2
+                                )
+                                linkTo(
+                                    top = parent.top,
+                                    topMargin = spacing_1,
+                                    bottom = parent.bottom,
+                                    bottomMargin = spacing_1
+                                )
+                                width = Dimension.fillToConstraints
+                            }
+                    )
+                }
+            }
+        }
+        LaunchedEffect(Unit) {
+            while (secondsToDisappear > 0) {
+                delay(1000)
+                secondsToDisappear -= 1
+            }
+            isButtonVisible = false
+        }
+    }
 }
-
-fun showError(
-    error: String,
-    context: Context
-): Unit = Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
 
 
 fun <T> getDataFromUiState(

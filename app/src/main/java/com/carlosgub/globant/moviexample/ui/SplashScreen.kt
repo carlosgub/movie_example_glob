@@ -8,21 +8,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.carlosgub.globant.core.commons.helpers.ShowErrorUiState
 import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
-import com.carlosgub.globant.core.commons.helpers.showError
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.theme.theme.PrimaryColor
 import com.carlosgub.globant.theme.theme.spacing_10
-import kotlinx.coroutines.delay
+import com.carlosgub.globant.theme.theme.spacing_4
 
 @Composable
 fun SplashScreen(
@@ -44,33 +42,30 @@ fun SplashScreen(
             }
         }
     )
-    LaunchedEffect(Unit){
-        delay(1500)
-        viewModel.isUserLogged()
-    }
-    val isUserLogged = getDataFromUiState(uiState)
-    if (isUserLogged == true) {
-        LaunchedEffect(Unit) {
-            goToScreen("home")
-        }
-    } else if (isUserLogged == false) {
-        LaunchedEffect(Unit) {
-            goToScreen("login")
-        }
-    }
-    val context = LocalContext.current
-    showError(uiState, context)
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
             .background(PrimaryColor)
     ) {
-        val (logo) = createRefs()
+        LaunchedEffect(Unit) {
+            viewModel.isUserLogged()
+        }
+        val isUserLogged = getDataFromUiState(uiState)
+        if (isUserLogged == true) {
+            LaunchedEffect(Unit) {
+                goToScreen("home")
+            }
+        } else if (isUserLogged == false) {
+            LaunchedEffect(Unit) {
+                goToScreen("login")
+            }
+        }
+        val (logo, error) = createRefs()
         Image(
             painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_imdb_logo_168_84),
             contentDescription = "Logo",
             modifier = Modifier
-                .semantics { testTag = "splash_screen_image" }
+                .testTag("splash_screen")
                 .constrainAs(logo) {
                     linkTo(
                         start = parent.start,
@@ -83,6 +78,21 @@ fun SplashScreen(
                         bottom = parent.bottom
                     )
                     height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints
+                }
+        )
+        ShowErrorUiState(
+            uiState = uiState,
+            Modifier
+                .testTag("splash_error")
+                .constrainAs(error) {
+                    linkTo(
+                        start = parent.start,
+                        startMargin = spacing_10,
+                        end = parent.end,
+                        endMargin = spacing_10
+                    )
+                    bottom.linkTo(parent.bottom, spacing_4)
                     width = Dimension.fillToConstraints
                 }
         )

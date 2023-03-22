@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import com.carlosgub.globant.theme.theme.TextColor
 import com.carlosgub.globant.theme.theme.TextColorDisabled
@@ -19,7 +20,8 @@ import com.carlosgub.globant.theme.theme.spacing_7
 
 @Composable
 fun IMDbButton(
-    onClick:()->Unit,
+    onClick: () -> Unit,
+    testName: String,
     isEnabled: Boolean,
     text: String,
     modifier: Modifier = Modifier,
@@ -30,11 +32,14 @@ fun IMDbButton(
                 onClick()
             }
         },
+        enabled = isEnabled,
         elevation = buttonNoElevation,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color.Transparent,
+            disabledBackgroundColor = Color.Transparent
         ),
         modifier = modifier
+            .testTag(testName)
     ) {
         Text(
             text = text,
