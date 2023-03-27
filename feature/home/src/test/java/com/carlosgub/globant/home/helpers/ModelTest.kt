@@ -1,6 +1,7 @@
 package com.carlosgub.globant.home.helpers
 
 import com.carlosgub.globant.core.commons.model.MovieModel
+import com.carlosgub.globant.home.data.network.response.MovieResponse
 
 val movieModel = MovieModel(
     id = 1,
@@ -9,7 +10,19 @@ val movieModel = MovieModel(
     releaseDate = "releaseDate",
     voteAverage = 20.0,
     voteCount = 1000,
-    runtime = "runtime",
-    overview = "overview",
+    runtime = null,
+    overview = null,
     castList = listOf()
+)
+
+val movieResponse = MovieResponse(
+    id = 1,
+    originalTitle = "test",
+    posterPath = "posterPath",
+    releaseDate = "releaseDate",
+    voteAverage = 20.0,
+    voteCount = 1000,
+    backdropPath = "",
+    genreIds = listOf(),
+    popularity = 0.0
 )

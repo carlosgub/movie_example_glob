@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -28,11 +29,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -57,7 +61,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -80,12 +83,16 @@ import com.carlosgub.globant.theme.theme.spacing_10
 import com.carlosgub.globant.theme.theme.spacing_2
 import com.carlosgub.globant.theme.theme.spacing_4
 import com.carlosgub.globant.theme.theme.spacing_6
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
-import com.facebook.login.widget.LoginButton
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -287,7 +294,6 @@ fun LoginScreen(
                     width = Dimension.fillToConstraints
                 }
         )
-
         AlternativeLoginContainer(
             appleClick = {
                 Toast.makeText(context, "No hay login con Apple por el momento", Toast.LENGTH_SHORT)
@@ -304,6 +310,9 @@ fun LoginScreen(
             },
             loginFacebook = {
                 viewModel.signWithFacebook(it.accessToken)
+            },
+            loginError = {
+                viewModel.showError(it)
             },
             modifier = Modifier
                 .constrainAs(alternativeLogin) {
@@ -503,6 +512,7 @@ fun AlternativeLoginContainer(
     appleClick: () -> Unit,
     googleClick: () -> Unit,
     loginFacebook: (LoginResult) -> Unit,
+    loginError: (message: String) -> Unit,
     modifier: Modifier
 ) {
     ConstraintLayout(modifier = modifier.fillMaxWidth()) {
@@ -545,8 +555,11 @@ fun AlternativeLoginContainer(
                 }
         )
         CustomFacebookButton(
-            loginFacebook = {
+            onAuthComplete = {
                 loginFacebook(it)
+            },
+            onAuthError = {
+                loginError(it)
             },
             modifier = Modifier
                 .size(48.dp)
@@ -653,15 +666,49 @@ fun SignUpContainer(
 @Composable
 fun CustomFacebookButton(
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    loginFacebook: (LoginResult) -> Unit,
+    onAuthComplete: (LoginResult) -> Unit,
+    onAuthError: (String) -> Unit
 ) {
-    AndroidView(
-        modifier = modifier,
-        factory = ::LoginButton,
-        update = { button ->
-            button.setPermissions("email")
-            button.isEnabled = enabled
+    val scope = rememberCoroutineScope()
+    val loginManager = LoginManager.getInstance()
+    val callbackManager = remember { CallbackManager.Factory.create() }
+    val launcher = rememberLauncherForActivityResult(
+        loginManager.createLogInActivityResultContract(callbackManager, null)
+    ) {
+        // nothing to do. handled in FacebookCallback
+    }
+
+    DisposableEffect(Unit) {
+        loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            override fun onCancel() {
+                onAuthError("Canceled")
+            }
+
+            override fun onError(error: FacebookException) {
+                onAuthError(error.message.orEmpty())
+            }
+
+            override fun onSuccess(result: LoginResult) {
+                scope.launch {
+                    onAuthComplete(result)
+                }
+            }
+        })
+
+        onDispose {
+            loginManager.unregisterCallback(callbackManager)
         }
+    }
+    Image(
+        painter = painterResource(id = com.carlosgub.globant.resources.R.drawable.ic_fb_logo_27_27),
+        contentDescription = stringResource(com.carlosgub.globant.resources.R.string.login_facebook_logo),
+        modifier = modifier
+            .size(40.dp)
+            .clickable { launcher.launch(listOf("email", "public_profile")) }
+            .background(
+                color = Color.White,
+                shape = MaterialTheme.shapes.medium
+            )
+            .clip(RoundedCornerShape(10.dp))
     )
 }

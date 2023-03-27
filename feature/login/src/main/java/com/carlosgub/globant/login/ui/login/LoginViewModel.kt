@@ -144,6 +144,11 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun showError(message: String) {
+        _uiState.value =
+            GenericState.Error(message)
+    }
+
     fun clearState() {
         _isLoginEnabled.value = false
         _passwordField.value = ""

@@ -37,49 +37,57 @@ fun <T> ShowErrorUiState(
     modifier: Modifier = Modifier
 ) {
     if (uiState is GenericState.Error) {
-        var isButtonVisible by remember { mutableStateOf(true) }
-        var secondsToDisappear by remember { mutableStateOf(5) }
-        AnimatedVisibility(
-            isButtonVisible,
-            modifier = modifier
-                .shadow(elevation = spacing_25)
+        ShowError(message = uiState.message, modifier = modifier)
+    }
+}
+
+@Composable
+fun ShowError(
+    message: String,
+    modifier: Modifier
+) {
+    var isButtonVisible by remember { mutableStateOf(true) }
+    var secondsToDisappear by remember { mutableStateOf(5) }
+    AnimatedVisibility(
+        isButtonVisible,
+        modifier = modifier
+            .shadow(elevation = spacing_25)
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-                    val (text) = createRefs()
-                    Text(
-                        text = uiState.message,
-                        color = Color.Black,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .constrainAs(text) {
-                                linkTo(
-                                    start = parent.start,
-                                    startMargin = spacing_2,
-                                    end = parent.end,
-                                    endMargin = spacing_2
-                                )
-                                linkTo(
-                                    top = parent.top,
-                                    topMargin = spacing_1,
-                                    bottom = parent.bottom,
-                                    bottomMargin = spacing_1
-                                )
-                                width = Dimension.fillToConstraints
-                            }
-                    )
-                }
+            ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+                val (text) = createRefs()
+                Text(
+                    text = message,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .constrainAs(text) {
+                            linkTo(
+                                start = parent.start,
+                                startMargin = spacing_2,
+                                end = parent.end,
+                                endMargin = spacing_2
+                            )
+                            linkTo(
+                                top = parent.top,
+                                topMargin = spacing_1,
+                                bottom = parent.bottom,
+                                bottomMargin = spacing_1
+                            )
+                            width = Dimension.fillToConstraints
+                        }
+                )
             }
         }
-        LaunchedEffect(Unit) {
-            while (secondsToDisappear > 0) {
-                delay(1000)
-                secondsToDisappear -= 1
-            }
-            isButtonVisible = false
+    }
+    LaunchedEffect(Unit) {
+        while (secondsToDisappear > 0) {
+            delay(1000)
+            secondsToDisappear -= 1
         }
+        isButtonVisible = false
     }
 }
 
