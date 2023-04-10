@@ -15,7 +15,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.carlosgub.globant.core.commons.helpers.navigateAndReplaceStartRoute
 import com.carlosgub.globant.home.ui.HomeFeature
-import com.carlosgub.globant.home.ui.home.HomeViewModel
+import com.carlosgub.globant.home.ui.movie.MovieViewModel
+import com.carlosgub.globant.home.ui.search.SearchViewModel
 import com.carlosgub.globant.login.ui.LoginFeature
 import com.carlosgub.globant.login.ui.login.LoginViewModel
 import com.carlosgub.globant.login.ui.signup.SignUpViewModel
@@ -31,7 +32,8 @@ class MainActivity : ComponentActivity() {
         val splashViewModel: SplashViewModel by viewModels()
         val loginViewModel: LoginViewModel by viewModels()
         val signUpViewModel: SignUpViewModel by viewModels()
-        val homeViewModel: HomeViewModel by viewModels()
+        val homeViewModel: SearchViewModel by viewModels()
+        val movieViewModel: MovieViewModel by viewModels()
         setContent {
             MovieExpertGlobantExampleTheme {
                 // A surface container using the 'background' color from the theme
@@ -63,7 +65,8 @@ class MainActivity : ComponentActivity() {
                                 signOut = {
                                     navigationController.navigateAndReplaceStartRoute("login")
                                 },
-                                homeViewModel = homeViewModel
+                                searchViewModel = homeViewModel,
+                                movieViewModel = movieViewModel
                             )
                         }
                     }

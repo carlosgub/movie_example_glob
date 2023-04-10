@@ -1,5 +1,6 @@
 package com.carlosgub.globant.home.di
 
+import com.carlosgub.globant.home.data.network.clients.MovieClient
 import com.carlosgub.globant.home.data.network.clients.SearchClient
 import dagger.Module
 import dagger.Provides
@@ -15,4 +16,8 @@ class HomeModule {
     @Provides
     fun providesSearchClient(retrofit: Retrofit): SearchClient =
         retrofit.create(SearchClient::class.java)
+    @Singleton
+    @Provides
+    fun providesMovieClient(retrofit: Retrofit): MovieClient =
+        retrofit.create(MovieClient::class.java)
 }

@@ -19,6 +19,7 @@ data class MovieResponse(
             id = id,
             originalTitle = originalTitle,
             posterPath = posterPath,
+            backdropPath = backdropPath,
             releaseDate = releaseDate,
             voteAverage = voteAverage,
             voteCount = voteCount,

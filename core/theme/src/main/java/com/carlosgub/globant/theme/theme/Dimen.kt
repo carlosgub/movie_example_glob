@@ -22,8 +22,10 @@ val spacing_37_2: Dp = 150.dp
 /*region view size*/
 val view_0: Dp = 0.dp
 val view_2: Dp = 8.dp
+val view_4: Dp = 16.dp
 val view_6: Dp = 24.dp
 val view_10: Dp = 40.dp
+val view_12: Dp = 56.dp
 val view_18: Dp = 72.dp
 val view_25: Dp = 100.dp
 val view_50: Dp = 200.dp

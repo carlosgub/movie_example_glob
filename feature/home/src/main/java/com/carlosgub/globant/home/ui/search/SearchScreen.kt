@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalComposeUiApi::class)
 
-package com.carlosgub.globant.home.ui.home
+package com.carlosgub.globant.home.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
@@ -89,9 +89,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
-fun HomeScreen(
+fun SearchScreen(
     signOut: () -> Unit,
-    viewModel: HomeViewModel,
+    viewModel: SearchViewModel,
     modifier: Modifier = Modifier
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle

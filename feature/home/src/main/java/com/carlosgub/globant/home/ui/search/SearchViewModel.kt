@@ -1,6 +1,6 @@
 @file:OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 
-package com.carlosgub.globant.home.ui.home
+package com.carlosgub.globant.home.ui.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class SearchViewModel @Inject constructor(
     private val getMoviesFromQueryUseCase: GetMoviesFromQueryUseCase,
     private val getMoviesFromCacheUseCase: GetMoviesFromCacheUseCase,
     private val signOutUseCase: SignOutUseCase,

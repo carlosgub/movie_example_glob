@@ -9,6 +9,7 @@ data class MovieModel(
     val id: Int,
     val originalTitle: String,
     val posterPath: String?,
+    val backdropPath: String?,
     val releaseDate: String?,
     val voteAverage: Double?,
     val voteCount: Int,

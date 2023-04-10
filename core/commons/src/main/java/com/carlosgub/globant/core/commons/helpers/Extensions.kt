@@ -10,6 +10,13 @@ fun MovieModel.getImagePath(): String =
         "https://i.stack.imgur.com/GNhx0.png"
     }
 
+fun MovieModel.getBackgroundPath(): String =
+    if (this.backdropPath != null) {
+        "https://image.tmdb.org/t/p/w500${backdropPath}";
+    } else {
+        "https://i.stack.imgur.com/GNhx0.png";
+    }
+
 fun NavHostController.navigateAndReplaceStartRoute(newHomeRoute: String) {
     navigate(newHomeRoute) {
         popUpTo(this@navigateAndReplaceStartRoute.graph.id) {

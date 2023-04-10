@@ -11,6 +11,7 @@ import com.carlosgub.globant.home.helpers.movieModel
 import com.carlosgub.globant.home.model.usecase.GetMoviesFromCacheUseCase
 import com.carlosgub.globant.home.model.usecase.GetMoviesFromQueryUseCase
 import com.carlosgub.globant.home.model.usecase.SignOutUseCase
+import com.carlosgub.globant.home.ui.search.SearchViewModel
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -62,7 +63,7 @@ class HomeViewModelTest {
             flowOf(list)
         )
         val viewModel =
-            HomeViewModel(
+            SearchViewModel(
                 getMoviesFromQueryUseCase,
                 getMoviesFromCacheUseCase,
                 signOutUseCase,
@@ -86,7 +87,7 @@ class HomeViewModelTest {
             flowOf(list)
         )
         val viewModel =
-            HomeViewModel(
+            SearchViewModel(
                 getMoviesFromQueryUseCase,
                 getMoviesFromCacheUseCase,
                 signOutUseCase,
@@ -111,7 +112,7 @@ class HomeViewModelTest {
             }
         )
         val viewModel =
-            HomeViewModel(
+            SearchViewModel(
                 getMoviesFromQueryUseCase,
                 getMoviesFromCacheUseCase,
                 signOutUseCase,
@@ -134,7 +135,7 @@ class HomeViewModelTest {
             flowOf(true)
         )
         val viewModel =
-            HomeViewModel(
+            SearchViewModel(
                 getMoviesFromQueryUseCase,
                 getMoviesFromCacheUseCase,
                 signOutUseCase,
@@ -157,7 +158,7 @@ class HomeViewModelTest {
             flowOf(false)
         )
         val viewModel =
-            HomeViewModel(
+            SearchViewModel(
                 getMoviesFromQueryUseCase,
                 getMoviesFromCacheUseCase,
                 signOutUseCase,
@@ -185,7 +186,7 @@ class HomeViewModelTest {
             }
         )
         val viewModel =
-            HomeViewModel(
+            SearchViewModel(
                 getMoviesFromQueryUseCase,
                 getMoviesFromCacheUseCase,
                 signOutUseCase,
