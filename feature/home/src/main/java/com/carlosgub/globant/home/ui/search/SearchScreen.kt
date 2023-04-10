@@ -3,6 +3,7 @@
 package com.carlosgub.globant.home.ui.search
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,6 +93,7 @@ import kotlinx.collections.immutable.toImmutableList
 fun SearchScreen(
     signOut: () -> Unit,
     viewModel: SearchViewModel,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -159,6 +161,7 @@ fun SearchScreen(
         SearchContent(
             uiState = uiState,
             queryValue = queryValue,
+            goToDetail = goToDetail,
             keyboardController = keyboardController,
             modifier = Modifier.constrainAs(searchContent) {
                 linkTo(
@@ -276,6 +279,7 @@ fun SearchContent(
     uiState: GenericState<List<MovieModel>>,
     queryValue: String,
     keyboardController: SoftwareKeyboardController?,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(modifier = modifier.background(TextFieldBackgroundColor)) {
@@ -335,6 +339,7 @@ fun SearchContent(
                 )
                 LazyVerticalMovies(
                     list = list.toImmutableList(),
+                    goToDetail = goToDetail,
                     state = state,
                     contentPaddingValues = PaddingValues(bottom = spacing_3),
                     modifier = Modifier.constrainAs(listRef) {
@@ -358,6 +363,7 @@ fun SearchContent(
 @Composable
 fun LazyVerticalMovies(
     list: ImmutableList<MovieModel>,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier,
     state: LazyListState,
     contentPaddingValues: PaddingValues = PaddingValues(vertical = spacing_3),
@@ -370,7 +376,7 @@ fun LazyVerticalMovies(
         state = state
     ) {
         items(list) { movieModel ->
-            MovieBookedItem(movieModel)
+            MovieBookedItem(movieModel, goToDetail = goToDetail)
             Divider(color = SeparatorColor)
         }
     }
@@ -379,10 +385,12 @@ fun LazyVerticalMovies(
 @Composable
 fun MovieBookedItem(
     movieModel: MovieModel,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(
         modifier = modifier
+            .clickable { goToDetail(movieModel.id) }
             .fillMaxWidth()
             .padding(all = spacing_3)
     ) {
@@ -481,8 +489,10 @@ fun MovieBookedItem(
 fun ShowNoMoviesFound(
     modifier: Modifier = Modifier
 ) {
-    ConstraintLayout(modifier = modifier
-        .testTag("home_no_movies")) {
+    ConstraintLayout(
+        modifier = modifier
+            .testTag("home_no_movies")
+    ) {
         val (lottie, spacer, text) = createRefs()
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(com.carlosgub.globant.resources.R.raw.no_found))
         val progressLottie by animateLottieCompositionAsState(

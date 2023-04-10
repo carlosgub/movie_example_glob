@@ -8,6 +8,7 @@ data class MovieModel(
     @PrimaryKey
     val id: Int,
     val originalTitle: String,
+    val title: String,
     val posterPath: String?,
     val backdropPath: String?,
     val releaseDate: String?,

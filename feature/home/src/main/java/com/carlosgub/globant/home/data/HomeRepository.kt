@@ -3,6 +3,7 @@ package com.carlosgub.globant.home.data
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.home.data.database.dao.MovieDao
 import com.carlosgub.globant.home.data.firebase.FirebaseHome
+import com.carlosgub.globant.home.data.network.service.DetailService
 import com.carlosgub.globant.home.data.network.service.MovieService
 import com.carlosgub.globant.home.data.network.service.SearchService
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class HomeRepository @Inject constructor(
     private val searchService: SearchService,
     private val movieService: MovieService,
+    private val detailService: DetailService,
     private val movieDao: MovieDao,
     private val firebaseHome: FirebaseHome
 ) {
@@ -47,5 +49,11 @@ class HomeRepository @Inject constructor(
                     it.toMovieModel(listOf())
                 }
             }.awaitAll()
+        }
+
+    suspend fun getMovieDetail(movieId: String): MovieModel =
+        withContext(Dispatchers.Default) {
+            val cast = searchService.getCreditsFromMovie(movieId = movieId.toInt())
+            detailService.getMovieDetail(movieId).toMovieModel(cast)
         }
 }

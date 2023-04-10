@@ -1,9 +1,10 @@
 package com.carlosgub.globant.home.data.network.response
 
+import com.carlosgub.globant.core.commons.model.CastModel
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.google.gson.annotations.SerializedName
 
-data class MovieResponse(
+data class MovieDetailResponse(
     val id: Int,
     @SerializedName("original_title") val originalTitle: String,
     @SerializedName("title") val title: String,
@@ -13,19 +14,20 @@ data class MovieResponse(
     @SerializedName("release_date") val releaseDate: String?,
     @SerializedName("vote_average") val voteAverage: Double?,
     @SerializedName("vote_count") val voteCount: Int,
-    @SerializedName("genre_ids") val genreIds: List<Int>
+    @SerializedName("runtime") val runtime: Int?,
+    @SerializedName("overview") val overview: String?
 ) {
-    fun toMovieModel(castList: List<CastResponse>): MovieModel {
-        return MovieModel(
+    fun toMovieModel(castList: List<CastResponse>): MovieModel =
+        MovieModel(
             id = id,
             originalTitle = originalTitle,
             title = title,
             posterPath = posterPath,
-            backdropPath = backdropPath,
             releaseDate = releaseDate,
             voteAverage = voteAverage,
             voteCount = voteCount,
-            castList = castList.map { it.toCastModel() }
+            overview = overview,
+            castList = castList.map { it.toCastModel() },
+            backdropPath = backdropPath
         )
-    }
 }

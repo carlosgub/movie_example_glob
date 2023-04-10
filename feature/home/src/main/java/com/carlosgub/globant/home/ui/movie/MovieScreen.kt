@@ -4,15 +4,14 @@ package com.carlosgub.globant.home.ui.movie
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,9 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,7 +49,6 @@ import com.carlosgub.globant.core.commons.helpers.showLoading
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.core.commons.views.Loading
-import com.carlosgub.globant.home.ui.search.MovieBookedItem
 import com.carlosgub.globant.resources.R
 import com.carlosgub.globant.theme.theme.PrimaryColor
 import com.carlosgub.globant.theme.theme.SeparatorColor
@@ -60,19 +56,14 @@ import com.carlosgub.globant.theme.theme.TextFieldBackgroundColor
 import com.carlosgub.globant.theme.theme.spacing_1
 import com.carlosgub.globant.theme.theme.spacing_1_2
 import com.carlosgub.globant.theme.theme.spacing_2
-import com.carlosgub.globant.theme.theme.spacing_3
 import com.carlosgub.globant.theme.theme.spacing_4
 import com.carlosgub.globant.theme.theme.spacing_6
-import com.carlosgub.globant.theme.theme.spacing_8
-import com.carlosgub.globant.theme.theme.view_18
-import com.carlosgub.globant.theme.theme.view_2
-import com.carlosgub.globant.theme.theme.view_25
 import com.carlosgub.globant.theme.theme.view_4
-import com.carlosgub.globant.theme.theme.view_6
 
 @Composable
 fun MovieScreen(
     viewModel: MovieViewModel,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -110,6 +101,7 @@ fun MovieScreen(
             val data = getDataFromUiState(uiState)
             MovieContent(
                 movieList = data.orEmpty(),
+                goToDetail = goToDetail,
                 modifier = Modifier
                     .constrainAs(body) {
                         linkTo(
@@ -129,6 +121,7 @@ fun MovieScreen(
 @Composable
 fun MovieContent(
     movieList: List<MovieModel>,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier
 ) {
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
@@ -143,10 +136,12 @@ fun MovieContent(
                             end = parent.end
                         )
                         top.linkTo(parent.top)
-                    }
+                    },
+                goToDetail = goToDetail
             )
             PopularList(
                 movieList = movieList.subList(1, movieList.size),
+                goToDetail = goToDetail,
                 modifier = Modifier
                     .constrainAs(listOfPopular) {
                         linkTo(
@@ -168,8 +163,14 @@ fun MovieContent(
 }
 
 @Composable
-fun MostPopular(movieModel: MovieModel, modifier: Modifier) {
-    ConstraintLayout(modifier = modifier.fillMaxWidth()) {
+fun MostPopular(
+    movieModel: MovieModel,
+    goToDetail: (Int) -> Unit,
+    modifier: Modifier
+) {
+    ConstraintLayout(modifier = modifier
+        .fillMaxWidth()
+        .clickable { goToDetail(movieModel.id) }) {
         val (movieBackground, moviePoster, movieName, movieDescription) = createRefs()
 
         AsyncImage(
@@ -243,7 +244,11 @@ fun MostPopular(movieModel: MovieModel, modifier: Modifier) {
 }
 
 @Composable
-fun PopularList(movieList: List<MovieModel>, modifier: Modifier) {
+fun PopularList(
+    movieList: List<MovieModel>,
+    goToDetail: (Int) -> Unit,
+    modifier: Modifier
+) {
     ConstraintLayout(modifier = modifier) {
         val state = rememberLazyListState()
         val (spacer, textColor, text, rv) = createRefs()
@@ -302,7 +307,10 @@ fun PopularList(movieList: List<MovieModel>, modifier: Modifier) {
             }
         ) {
             items(movieList) { movieModel ->
-                MoviePopularItem(movieModel)
+                MoviePopularItem(
+                    movieModel,
+                    goToDetail = goToDetail
+                )
                 Divider(color = SeparatorColor)
             }
         }
@@ -312,11 +320,13 @@ fun PopularList(movieList: List<MovieModel>, modifier: Modifier) {
 @Composable
 fun MoviePopularItem(
     movieModel: MovieModel,
+    goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         shape = MaterialTheme.shapes.small,
         modifier = modifier
+            .clickable { goToDetail(movieModel.id) }
             .padding(horizontal = spacing_2)
     ) {
         ConstraintLayout(
