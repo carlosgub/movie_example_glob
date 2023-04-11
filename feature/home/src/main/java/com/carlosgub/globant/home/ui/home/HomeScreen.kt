@@ -32,6 +32,7 @@ import com.carlosgub.globant.home.ui.movie.MovieScreen
 import com.carlosgub.globant.home.ui.movie.MovieViewModel
 import com.carlosgub.globant.home.ui.play.PlayScreen
 import com.carlosgub.globant.home.ui.profile.ProfileScreen
+import com.carlosgub.globant.home.ui.profile.ProfileViewModel
 import com.carlosgub.globant.home.ui.search.SearchScreen
 import com.carlosgub.globant.home.ui.search.SearchViewModel
 import com.carlosgub.globant.theme.theme.PrimaryColor
@@ -46,6 +47,7 @@ fun HomeScreen(
     signOut: () -> Unit,
     movieViewModel: MovieViewModel,
     searchViewModel: SearchViewModel,
+    profileViewModel: ProfileViewModel,
     goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -58,6 +60,7 @@ fun HomeScreen(
             movieViewModel = movieViewModel,
             navController = navController,
             searchViewModel = searchViewModel,
+            profileViewModel = profileViewModel,
             goToDetail = goToDetail,
             signOut = signOut,
             modifier = Modifier
@@ -214,8 +217,7 @@ fun AddItem(
 fun BottomNavGraph(
     navController: NavHostController,
     movieViewModel: MovieViewModel,
-    /*mainNavController: NavHostController,
-    ticketViewModel: TicketViewModel,*/
+    profileViewModel: ProfileViewModel,
     searchViewModel: SearchViewModel,
     signOut: () -> Unit,
     goToDetail: (Int) -> Unit,
@@ -234,7 +236,6 @@ fun BottomNavGraph(
         }
         composable(route = BottomBarScreen.Search.route) {
             SearchScreen(
-                signOut = signOut,
                 viewModel = searchViewModel,
                 goToDetail = goToDetail
             )
@@ -244,7 +245,10 @@ fun BottomNavGraph(
             )
         }
         composable(route = BottomBarScreen.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(
+                viewModel = profileViewModel,
+                signOut = signOut
+            )
         }
     }
 }

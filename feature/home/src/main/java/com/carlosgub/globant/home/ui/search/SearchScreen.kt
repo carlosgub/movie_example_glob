@@ -91,7 +91,6 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun SearchScreen(
-    signOut: () -> Unit,
     viewModel: SearchViewModel,
     goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -111,25 +110,7 @@ fun SearchScreen(
             }
         }
     )
-    val uiStateSignOut by produceState<GenericState<Boolean>>(
-        initialValue = GenericState.Loading,
-        key1 = lifecycle,
-        key2 = viewModel,
-        producer = {
-            lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-                viewModel.uiStateSignOut.collect {
-                    value = it
-                }
-            }
-        }
-    )
-    val data = getDataFromUiState(uiStateSignOut)
-    if (data == true) {
-        viewModel.clearState()
-        LaunchedEffect(Unit) {
-            signOut()
-        }
-    }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
@@ -177,36 +158,8 @@ fun SearchScreen(
                 height = Dimension.fillToConstraints
             }
         )
-
-        MyFAB(
-            onClick = {
-                viewModel.signOut()
-            }, modifier = Modifier
-                .testTag("home_sign_out")
-                .constrainAs(fab) {
-                    end.linkTo(parent.end, spacing_6)
-                    bottom.linkTo(parent.bottom, spacing_6)
-                    height = Dimension.wrapContent
-                    width = Dimension.wrapContent
-                }
-        )
         ShowErrorUiState(
             uiState,
-            modifier = Modifier
-                .testTag("home_error")
-                .constrainAs(error) {
-                    linkTo(
-                        start = parent.start,
-                        startMargin = spacing_10,
-                        end = parent.end,
-                        endMargin = spacing_10
-                    )
-                    bottom.linkTo(parent.bottom, spacing_4)
-                    width = Dimension.fillToConstraints
-                }
-        )
-        ShowErrorUiState(
-            uiStateSignOut,
             modifier = Modifier
                 .testTag("home_error")
                 .constrainAs(error) {

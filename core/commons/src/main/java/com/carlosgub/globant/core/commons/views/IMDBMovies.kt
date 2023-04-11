@@ -3,7 +3,6 @@ package com.carlosgub.globant.core.commons.views
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,14 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -35,10 +32,8 @@ import coil.request.ImageRequest
 import com.carlosgub.globant.core.commons.helpers.getImagePath
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.resources.R
-import com.carlosgub.globant.theme.theme.PrimaryColor
 import com.carlosgub.globant.theme.theme.TextFieldBackgroundColor
 import com.carlosgub.globant.theme.theme.spacing_1
-import com.carlosgub.globant.theme.theme.spacing_1_2
 import com.carlosgub.globant.theme.theme.spacing_2
 import com.carlosgub.globant.theme.theme.spacing_4
 import com.carlosgub.globant.theme.theme.spacing_6
@@ -46,14 +41,14 @@ import com.carlosgub.globant.theme.theme.view_4
 
 @Composable
 fun IMDBMovies(
-    title:String,
+    title: String,
     movies: List<MovieModel>,
     goToDetail: (Int) -> Unit,
     modifier: Modifier
 ) {
     ConstraintLayout(modifier = modifier) {
         val state = rememberLazyListState()
-        val (spacer, textColor, text, rv) = createRefs()
+        val (spacer, textColor, rv) = createRefs()
 
         Divider(
             modifier = Modifier
@@ -67,32 +62,14 @@ fun IMDBMovies(
                     top.linkTo(parent.top)
                 }
         )
-        Box(
-            Modifier
-                .clip(CircleShape)
-                .width(spacing_1_2)
-                .height(spacing_6)
-                .background(PrimaryColor)
+        IMDBTitle(
+            title = title,
+            modifier = Modifier
                 .constrainAs(textColor) {
-                    start.linkTo(parent.start, spacing_6)
-                    top.linkTo(spacer.bottom, spacing_4)
-                })
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
-            color = Color.Black,
-            modifier = Modifier.constrainAs(text) {
-                linkTo(
-                    start = textColor.end,
-                    startMargin = spacing_2,
-                    end = parent.end,
-                    endMargin = spacing_6
-                )
-                top.linkTo(textColor.top)
-                bottom.linkTo(textColor.bottom)
-                width = Dimension.fillToConstraints
-            }
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(spacer.bottom)
+                }
         )
         LazyRow(
             contentPadding = PaddingValues(vertical = spacing_4),

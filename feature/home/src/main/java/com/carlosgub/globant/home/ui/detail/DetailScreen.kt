@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -30,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +52,7 @@ import com.carlosgub.globant.core.commons.model.CastModel
 import com.carlosgub.globant.core.commons.model.DetailScreenModel
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
+import com.carlosgub.globant.core.commons.views.IMDBTitle
 import com.carlosgub.globant.core.commons.views.IMDBMovies
 import com.carlosgub.globant.core.commons.views.Loading
 import com.carlosgub.globant.resources.R
@@ -353,36 +351,15 @@ fun MovieDetailHeader(
     modifier: Modifier
 ) {
     ConstraintLayout(modifier = modifier) {
-        val (titleBullet, titleRef, originalTitle, id) = createRefs()
-        Box(
-            Modifier
-                .clip(CircleShape)
-                .width(spacing_1_2)
-                .height(spacing_6)
-                .background(PrimaryColor)
+        val (titleBullet, originalTitle, id) = createRefs()
+        IMDBTitle(
+            title = movie.title,
+            modifier = Modifier
                 .constrainAs(titleBullet) {
-                    start.linkTo(parent.start, spacing_6)
-                    top.linkTo(parent.top, spacing_4)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
                 }
-        )
-        Text(
-            text = movie.title,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = Color.Black,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.constrainAs(titleRef) {
-                linkTo(
-                    start = titleBullet.end,
-                    startMargin = spacing_3,
-                    end = parent.end,
-                    endMargin = spacing_6
-                )
-                top.linkTo(titleBullet.top)
-                bottom.linkTo(titleBullet.bottom)
-                width = Dimension.fillToConstraints
-            }
         )
         Text(
             text = "${movie.originalTitle} (titulo original)",
@@ -392,8 +369,8 @@ fun MovieDetailHeader(
             fontSize = 10.sp,
             modifier = Modifier.constrainAs(originalTitle) {
                 linkTo(
-                    start = titleBullet.end,
-                    startMargin = spacing_3,
+                    start = parent.start,
+                    startMargin = spacing_10,
                     end = parent.end,
                     endMargin = spacing_6
                 )
@@ -409,8 +386,8 @@ fun MovieDetailHeader(
             fontSize = 12.sp,
             modifier = Modifier.constrainAs(id) {
                 linkTo(
-                    start = titleBullet.end,
-                    startMargin = spacing_3,
+                    start = parent.start,
+                    startMargin = spacing_10,
                     end = parent.end,
                     endMargin = spacing_6
                 )
@@ -509,36 +486,15 @@ fun MovieDetailCast(
 ) {
     val state = rememberLazyListState()
     ConstraintLayout(modifier = modifier) {
-        val (castBullet, castTitle, rv) = createRefs()
-        Box(
+        val (castBullet, rv) = createRefs()
+        IMDBTitle(
+            title = "Reparto",
             modifier = Modifier
-                .clip(CircleShape)
-                .width(spacing_1_2)
-                .height(spacing_6)
-                .background(PrimaryColor)
                 .constrainAs(castBullet) {
-                    start.linkTo(parent.start, spacing_6)
-                    top.linkTo(parent.top, spacing_4)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
                 }
-        )
-        Text(
-            text = "Reparto",
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = Color.Black,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.constrainAs(castTitle) {
-                linkTo(
-                    start = castBullet.end,
-                    startMargin = spacing_3,
-                    end = parent.end,
-                    endMargin = spacing_6
-                )
-                top.linkTo(castBullet.top)
-                bottom.linkTo(castBullet.bottom)
-                width = Dimension.fillToConstraints
-            }
         )
         LazyRow(
             contentPadding = PaddingValues(vertical = spacing_4),
@@ -550,7 +506,7 @@ fun MovieDetailCast(
                     end = parent.end,
                     endMargin = spacing_4
                 )
-                top.linkTo(castTitle.bottom, spacing_2)
+                top.linkTo(castBullet.bottom, spacing_2)
                 width = Dimension.fillToConstraints
             }
         ) {

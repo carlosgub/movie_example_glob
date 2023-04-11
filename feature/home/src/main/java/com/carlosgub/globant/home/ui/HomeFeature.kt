@@ -13,6 +13,7 @@ import com.carlosgub.globant.home.ui.detail.DetailScreen
 import com.carlosgub.globant.home.ui.detail.DetailViewModel
 import com.carlosgub.globant.home.ui.home.HomeScreen
 import com.carlosgub.globant.home.ui.movie.MovieViewModel
+import com.carlosgub.globant.home.ui.profile.ProfileViewModel
 import com.carlosgub.globant.home.ui.search.SearchViewModel
 
 @Composable
@@ -21,6 +22,7 @@ fun HomeFeature(
     movieViewModel: MovieViewModel,
     searchViewModel: SearchViewModel,
     detailViewModel: DetailViewModel,
+    profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
     val navigationController by rememberUpdatedState(newValue = rememberNavController())
@@ -30,6 +32,7 @@ fun HomeFeature(
                 signOut = signOut,
                 movieViewModel = movieViewModel,
                 searchViewModel = searchViewModel,
+                profileViewModel = profileViewModel,
                 modifier = modifier,
                 goToDetail = {
                     navigationController.navigate("detail/$it")

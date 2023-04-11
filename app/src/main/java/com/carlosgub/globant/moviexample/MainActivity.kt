@@ -17,6 +17,7 @@ import com.carlosgub.globant.core.commons.helpers.navigateAndReplaceStartRoute
 import com.carlosgub.globant.home.ui.HomeFeature
 import com.carlosgub.globant.home.ui.detail.DetailViewModel
 import com.carlosgub.globant.home.ui.movie.MovieViewModel
+import com.carlosgub.globant.home.ui.profile.ProfileViewModel
 import com.carlosgub.globant.home.ui.search.SearchViewModel
 import com.carlosgub.globant.login.ui.LoginFeature
 import com.carlosgub.globant.login.ui.login.LoginViewModel
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
         val homeViewModel: SearchViewModel by viewModels()
         val movieViewModel: MovieViewModel by viewModels()
         val detailViewModel: DetailViewModel by viewModels()
+        val profileViewModel: ProfileViewModel by viewModels()
         setContent {
             MovieExpertGlobantExampleTheme {
                 // A surface container using the 'background' color from the theme
@@ -69,7 +71,8 @@ class MainActivity : ComponentActivity() {
                                 },
                                 searchViewModel = homeViewModel,
                                 movieViewModel = movieViewModel,
-                                detailViewModel = detailViewModel
+                                detailViewModel = detailViewModel,
+                                profileViewModel = profileViewModel
                             )
                         }
                     }
