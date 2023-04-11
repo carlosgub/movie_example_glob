@@ -1,7 +1,9 @@
 package com.carlosgub.globant.home.data
 
+import com.carlosgub.globant.core.commons.model.DetailScreenModel
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.model.MovieScreenModel
+import com.carlosgub.globant.home.BuildConfig
 import com.carlosgub.globant.home.data.database.dao.MovieDao
 import com.carlosgub.globant.home.data.firebase.FirebaseHome
 import com.carlosgub.globant.home.data.network.service.DetailService
@@ -61,9 +63,19 @@ class HomeRepository @Inject constructor(
             )
         }
 
-    suspend fun getMovieDetail(movieId: String): MovieModel =
+    suspend fun getMovieDetail(movieId: String): DetailScreenModel =
         withContext(Dispatchers.Default) {
             val cast = searchService.getCreditsFromMovie(movieId = movieId.toInt())
-            detailService.getMovieDetail(movieId).toMovieModel(cast)
+            val movieDetail = detailService.getMovieDetail(movieId).toMovieModel(cast)
+            if (BuildConfig.FLAVOR == "withrecomendation") {
+                val recommendations = detailService.getMovieRecommendation(movieId).map {
+                    async {
+                        it.toMovieModel(listOf())
+                    }
+                }.awaitAll()
+                DetailScreenModel(movieDetail, recommendations)
+            } else {
+                DetailScreenModel(movieDetail, listOf())
+            }
         }
 }

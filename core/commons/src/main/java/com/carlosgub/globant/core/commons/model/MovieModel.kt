@@ -13,7 +13,7 @@ data class MovieModel(
     val backdropPath: String?,
     val releaseDate: String?,
     val voteAverage: Double?,
-    val voteCount: Int,
+    val voteCount: Int?,
     val runtime: String? = null,
     val overview: String? = null,
     val castList: List<CastModel>,

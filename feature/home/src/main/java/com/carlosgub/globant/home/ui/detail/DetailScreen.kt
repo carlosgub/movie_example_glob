@@ -52,8 +52,10 @@ import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
 import com.carlosgub.globant.core.commons.helpers.getImagePath
 import com.carlosgub.globant.core.commons.helpers.showLoading
 import com.carlosgub.globant.core.commons.model.CastModel
+import com.carlosgub.globant.core.commons.model.DetailScreenModel
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
+import com.carlosgub.globant.core.commons.views.IMDBMovies
 import com.carlosgub.globant.core.commons.views.Loading
 import com.carlosgub.globant.resources.R
 import com.carlosgub.globant.theme.theme.PrimaryColor
@@ -77,7 +79,7 @@ fun DetailScreen(
     modifier: Modifier = Modifier
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val uiState by produceState<GenericState<MovieModel>>(
+    val uiState by produceState<GenericState<DetailScreenModel>>(
         initialValue = GenericState.Loading,
         key1 = lifecycle,
         key2 = viewModel,
@@ -112,9 +114,9 @@ fun DetailScreen(
                 }
             )
         } else {
-            getDataFromUiState(uiState)?.let { movieModel ->
+            getDataFromUiState(uiState)?.let { detailScreenModel ->
                 MovieDetailContent(
-                    movie = movieModel,
+                    detailScreenModel = detailScreenModel,
                     goBack = goBack,
                     modifier = Modifier.constrainAs(content) {
                         linkTo(
@@ -134,7 +136,7 @@ fun DetailScreen(
 
 @Composable
 fun MovieDetailContent(
-    movie: MovieModel,
+    detailScreenModel: DetailScreenModel,
     goBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -144,9 +146,9 @@ fun MovieDetailContent(
             .fillMaxWidth()
             .verticalScroll(state)
     ) {
-        val (toolbar, header, backdropImage, summary, firstDivider, followButton, secondDivider, cast) = createRefs()
+        val (toolbar, header, backdropImage, summary, firstDivider, followButton, secondDivider, cast, recommendation) = createRefs()
         MovieDetailToolbar(
-            movie.title,
+            detailScreenModel.detail.title,
             goBack = goBack,
             modifier = Modifier.constrainAs(toolbar) {
                 linkTo(
@@ -158,7 +160,7 @@ fun MovieDetailContent(
             }
         )
         MovieDetailHeader(
-            movie,
+            detailScreenModel.detail,
             modifier = Modifier.constrainAs(header) {
                 linkTo(
                     start = parent.start,
@@ -170,7 +172,7 @@ fun MovieDetailContent(
         )
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(movie.getBackgroundPath())
+                .data(detailScreenModel.detail.getBackgroundPath())
                 .crossfade(true)
                 .build(),
             placeholder = painterResource(R.drawable.placeholder),
@@ -187,7 +189,7 @@ fun MovieDetailContent(
                 }
         )
         MovieDetailSummary(
-            movie,
+            detailScreenModel.detail,
             modifier = Modifier.constrainAs(summary) {
                 linkTo(
                     start = parent.start,
@@ -260,7 +262,7 @@ fun MovieDetailContent(
                 }
         )
         MovieDetailCast(
-            cast = movie.castList,
+            cast = detailScreenModel.detail.castList,
             modifier = Modifier
                 .constrainAs(cast) {
                     linkTo(
@@ -271,6 +273,23 @@ fun MovieDetailContent(
                     width = Dimension.fillToConstraints
                 }
         )
+        if (detailScreenModel.recommendation.isNotEmpty()) {
+            IMDBMovies(
+                title = "Recomendados",
+                movies = detailScreenModel.recommendation,
+                goToDetail = {
+
+                },
+                modifier = Modifier.constrainAs(recommendation) {
+                    linkTo(
+                        start = parent.start,
+                        end = parent.end,
+                    )
+                    top.linkTo(cast.bottom, spacing_2)
+                    width = Dimension.fillToConstraints
+                }
+            )
+        }
     }
 }
 
@@ -383,7 +402,7 @@ fun MovieDetailHeader(
             }
         )
         Text(
-            text = movie.id.toString(),
+            text = "ID: ${movie.id}",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = TextDetailColor,

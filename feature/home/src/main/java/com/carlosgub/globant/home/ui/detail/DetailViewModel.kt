@@ -3,6 +3,7 @@ package com.carlosgub.globant.home.ui.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carlosgub.globant.core.commons.DispatcherProvider
+import com.carlosgub.globant.core.commons.model.DetailScreenModel
 import com.carlosgub.globant.core.commons.model.MovieModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.home.model.usecase.GetMovieDetailUseCase
@@ -20,8 +21,8 @@ class DetailViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<GenericState<MovieModel>>(GenericState.Loading)
-    val uiState: StateFlow<GenericState<MovieModel>> = _uiState
+    private val _uiState = MutableStateFlow<GenericState<DetailScreenModel>>(GenericState.Loading)
+    val uiState: StateFlow<GenericState<DetailScreenModel>> = _uiState
 
 
     fun getMovieDetail(movieId: String) {
