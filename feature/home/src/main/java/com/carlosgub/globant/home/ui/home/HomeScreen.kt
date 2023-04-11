@@ -37,6 +37,7 @@ import com.carlosgub.globant.home.ui.search.SearchViewModel
 import com.carlosgub.globant.theme.theme.PrimaryColor
 import com.carlosgub.globant.theme.theme.spacing_2
 import com.carlosgub.globant.theme.theme.spacing_2_2
+import com.carlosgub.globant.theme.theme.spacing_4
 import com.carlosgub.globant.theme.theme.spacing_4_2
 import com.carlosgub.globant.theme.theme.view_12
 
@@ -92,7 +93,7 @@ fun BottomBar(
                     end.linkTo(search.start)
                     linkTo(
                         top = parent.top,
-                        topMargin = spacing_4_2,
+                        topMargin = spacing_2,
                         bottomMargin = spacing_2,
                         bottom = parent.bottom
                     )
@@ -107,7 +108,7 @@ fun BottomBar(
                 end.linkTo(ticket.start)
                 linkTo(
                     top = parent.top,
-                    topMargin = spacing_4_2,
+                    topMargin = spacing_2,
                     bottomMargin = spacing_2,
                     bottom = parent.bottom
                 )
@@ -122,7 +123,7 @@ fun BottomBar(
                 end.linkTo(profile.start)
                 linkTo(
                     top = parent.top,
-                    topMargin = spacing_4_2,
+                    topMargin = spacing_2,
                     bottomMargin = spacing_2,
                     bottom = parent.bottom
                 )
@@ -137,7 +138,7 @@ fun BottomBar(
                 end.linkTo(parent.end, spacing_2_2)
                 linkTo(
                     top = parent.top,
-                    topMargin = spacing_4_2,
+                    topMargin = spacing_2,
                     bottomMargin = spacing_2,
                     bottom = parent.bottom
                 )

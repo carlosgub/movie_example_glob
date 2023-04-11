@@ -13,4 +13,9 @@ interface DetailClient {
         @Path("movie_id") movieId: String,
         @Query("api_key") apiKey: String = BuildConfig.API_KEY
     ): Response<MovieDetailResponse>
+    @GET("/3/movie/{movie_id}/recommendations")
+    suspend fun getMovieRecomendations(
+        @Path("movie_id") movieId: String,
+        @Query("api_key") apiKey: String = BuildConfig.API_KEY
+    ): Response<MovieDetailResponse>
 }

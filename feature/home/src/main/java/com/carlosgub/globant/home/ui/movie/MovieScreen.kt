@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -47,11 +49,11 @@ import com.carlosgub.globant.core.commons.helpers.getDataFromUiState
 import com.carlosgub.globant.core.commons.helpers.getImagePath
 import com.carlosgub.globant.core.commons.helpers.showLoading
 import com.carlosgub.globant.core.commons.model.MovieModel
+import com.carlosgub.globant.core.commons.model.MovieScreenModel
 import com.carlosgub.globant.core.commons.sealed.GenericState
 import com.carlosgub.globant.core.commons.views.Loading
 import com.carlosgub.globant.resources.R
 import com.carlosgub.globant.theme.theme.PrimaryColor
-import com.carlosgub.globant.theme.theme.SeparatorColor
 import com.carlosgub.globant.theme.theme.TextFieldBackgroundColor
 import com.carlosgub.globant.theme.theme.spacing_1
 import com.carlosgub.globant.theme.theme.spacing_1_2
@@ -67,7 +69,7 @@ fun MovieScreen(
     modifier: Modifier = Modifier
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val uiState by produceState<GenericState<List<MovieModel>>>(
+    val uiState by produceState<GenericState<MovieScreenModel>>(
         initialValue = GenericState.Loading,
         key1 = lifecycle,
         key2 = viewModel,
@@ -99,36 +101,43 @@ fun MovieScreen(
             )
         } else {
             val data = getDataFromUiState(uiState)
-            MovieContent(
-                movieList = data.orEmpty(),
-                goToDetail = goToDetail,
-                modifier = Modifier
-                    .constrainAs(body) {
-                        linkTo(
-                            start = parent.start,
-                            end = parent.end
-                        )
-                        linkTo(
-                            top = parent.top,
-                            bottom = parent.bottom
-                        )
-                    }
-            )
+            data?.let {
+                MovieContent(
+                    movieScreenModel = data,
+                    goToDetail = goToDetail,
+                    modifier = Modifier
+                        .constrainAs(body) {
+                            linkTo(
+                                start = parent.start,
+                                end = parent.end
+                            )
+                            linkTo(
+                                top = parent.top,
+                                bottom = parent.bottom
+                            )
+                        }
+                )
+            }
         }
     }
 }
 
 @Composable
 fun MovieContent(
-    movieList: List<MovieModel>,
+    movieScreenModel: MovieScreenModel,
     goToDetail: (Int) -> Unit,
     modifier: Modifier
 ) {
-    ConstraintLayout(modifier = modifier.fillMaxSize()) {
-        val (mostPopular, listOfPopular) = createRefs()
-        if (movieList.isNotEmpty()) {
+    val state = rememberScrollState()
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(state)
+    ) {
+        val (mostPopular, popular, topRated) = createRefs()
+        if (movieScreenModel.popular.isNotEmpty()) {
             MostPopular(
-                movieModel = movieList.first(),
+                movieModel = movieScreenModel.popular.first(),
                 modifier = Modifier
                     .constrainAs(mostPopular) {
                         linkTo(
@@ -140,21 +149,35 @@ fun MovieContent(
                 goToDetail = goToDetail
             )
             PopularList(
-                movieList = movieList.subList(1, movieList.size),
+                movieList = movieScreenModel.popular.subList(1, movieScreenModel.popular.size),
                 goToDetail = goToDetail,
                 modifier = Modifier
-                    .constrainAs(listOfPopular) {
+                    .constrainAs(popular) {
+                        linkTo(
+                            start = parent.start,
+                            end = parent.end
+                        )
+                        top.linkTo(mostPopular.bottom, spacing_6)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.wrapContent
+                    }
+            )
+            TopRatedList(
+                topRated = movieScreenModel.topRated,
+                goToDetail = goToDetail,
+                modifier = Modifier
+                    .constrainAs(topRated) {
                         linkTo(
                             start = parent.start,
                             end = parent.end
                         )
                         linkTo(
-                            top = mostPopular.bottom,
-                            topMargin = spacing_6,
+                            top = popular.bottom,
+                            topMargin = spacing_1,
                             bottom = parent.bottom
                         )
                         width = Dimension.fillToConstraints
-                        height = Dimension.fillToConstraints
+                        height = Dimension.wrapContent
                     }
             )
         }
@@ -307,18 +330,90 @@ fun PopularList(
             }
         ) {
             items(movieList) { movieModel ->
-                MoviePopularItem(
+                MovieScreenItem(
                     movieModel,
                     goToDetail = goToDetail
                 )
-                Divider(color = SeparatorColor)
             }
         }
     }
 }
 
 @Composable
-fun MoviePopularItem(
+fun TopRatedList(
+    topRated: List<MovieModel>,
+    goToDetail: (Int) -> Unit,
+    modifier: Modifier
+) {
+    ConstraintLayout(modifier = modifier) {
+        val state = rememberLazyListState()
+        val (spacer, textColor, text, rv) = createRefs()
+
+        Divider(
+            modifier = Modifier
+                .background(TextFieldBackgroundColor)
+                .height(view_4)
+                .constrainAs(spacer) {
+                    linkTo(
+                        start = parent.start,
+                        end = parent.end
+                    )
+                    top.linkTo(parent.top)
+                }
+        )
+        Box(
+            Modifier
+                .clip(CircleShape)
+                .width(spacing_1_2)
+                .height(spacing_6)
+                .background(PrimaryColor)
+                .constrainAs(textColor) {
+                    start.linkTo(parent.start, spacing_6)
+                    top.linkTo(spacer.bottom, spacing_4)
+                })
+
+        Text(
+            text = "Favoritos de los aficionados",
+            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+            color = Color.Black,
+            modifier = Modifier.constrainAs(text) {
+                linkTo(
+                    start = textColor.end,
+                    startMargin = spacing_2,
+                    end = parent.end,
+                    endMargin = spacing_6
+                )
+                top.linkTo(textColor.top)
+                bottom.linkTo(textColor.bottom)
+                width = Dimension.fillToConstraints
+            }
+        )
+        LazyRow(
+            contentPadding = PaddingValues(vertical = spacing_4),
+            state = state,
+            modifier = Modifier.constrainAs(rv) {
+                linkTo(
+                    start = parent.start,
+                    startMargin = spacing_4,
+                    end = parent.end,
+                    endMargin = spacing_4
+                )
+                top.linkTo(textColor.bottom, spacing_4)
+                width = Dimension.fillToConstraints
+            }
+        ) {
+            items(topRated) { movieModel ->
+                MovieScreenItem(
+                    movieModel,
+                    goToDetail = goToDetail
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieScreenItem(
     movieModel: MovieModel,
     goToDetail: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -368,7 +463,6 @@ fun MoviePopularItem(
                 painter = painterResource(
                     id = R.drawable.ic_star_12_12
                 ),
-                alpha = 0.8f,
                 contentDescription = "star",
                 modifier = Modifier
                     .constrainAs(star) {

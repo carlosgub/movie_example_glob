@@ -7,8 +7,14 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface MovieClient {
-    @GET("/3/movie/now_playing")
+    @GET("/3/movie/popular")
     suspend fun getNowPlayingMovies(
+        @Query("api_key") apiKey: String = BuildConfig.API_KEY,
+        @Query("page") page: Int = 1
+    ): Response<MoviesResponse>
+
+    @GET("/3/movie/top_rated")
+    suspend fun getTopRated(
         @Query("api_key") apiKey: String = BuildConfig.API_KEY,
         @Query("page") page: Int = 1
     ): Response<MoviesResponse>

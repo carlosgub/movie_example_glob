@@ -25,7 +25,8 @@ data class MovieResponse(
             releaseDate = releaseDate,
             voteAverage = voteAverage,
             voteCount = voteCount,
-            castList = castList.map { it.toCastModel() }
+            castList = castList.map { it.toCastModel() },
+            genres = listOf()
         )
     }
 }

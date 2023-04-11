@@ -1,6 +1,7 @@
 package com.carlosgub.globant.home.data
 
 import com.carlosgub.globant.core.commons.model.MovieModel
+import com.carlosgub.globant.core.commons.model.MovieScreenModel
 import com.carlosgub.globant.home.data.database.dao.MovieDao
 import com.carlosgub.globant.home.data.firebase.FirebaseHome
 import com.carlosgub.globant.home.data.network.service.DetailService
@@ -42,13 +43,22 @@ class HomeRepository @Inject constructor(
             firebaseHome.signOut()
         }
 
-    suspend fun getNowPlayingMovies(): List<MovieModel> =
+    suspend fun getNowPlayingMovies(): MovieScreenModel =
         withContext(Dispatchers.Default) {
-            movieService.getNowPlayingMovies().map {
+            val popularList = movieService.getPopular().map {
                 async {
                     it.toMovieModel(listOf())
                 }
             }.awaitAll()
+            val topRatedList = movieService.getTopRated().map {
+                async {
+                    it.toMovieModel(listOf())
+                }
+            }.awaitAll()
+            MovieScreenModel(
+                popular = popularList,
+                topRated = topRatedList
+            )
         }
 
     suspend fun getMovieDetail(movieId: String): MovieModel =

@@ -9,9 +9,14 @@ import javax.inject.Inject
 class MovieService @Inject constructor(
     private val movieClient: MovieClient
 ) {
-    suspend fun getNowPlayingMovies(): List<MovieResponse> =
+    suspend fun getPopular(): List<MovieResponse> =
         withContext(Dispatchers.IO) {
             val response = movieClient.getNowPlayingMovies()
+            response.body()?.results ?: listOf()
+        }
+    suspend fun getTopRated(): List<MovieResponse> =
+        withContext(Dispatchers.IO) {
+            val response = movieClient.getTopRated()
             response.body()?.results ?: listOf()
         }
 }

@@ -16,5 +16,6 @@ data class MovieModel(
     val voteCount: Int,
     val runtime: String? = null,
     val overview: String? = null,
-    val castList: List<CastModel>
+    val castList: List<CastModel>,
+    val genres: List<GenresModel>
 )
