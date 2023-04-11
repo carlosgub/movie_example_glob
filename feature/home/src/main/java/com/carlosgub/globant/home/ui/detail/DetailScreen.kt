@@ -300,7 +300,7 @@ fun MovieDetailToolbar(
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .height(42.dp)
+            .height(48.dp)
     ) {
         val (back, titleRef, divider) = createRefs()
         Icon(
@@ -311,7 +311,8 @@ fun MovieDetailToolbar(
                 .clickable { goBack() }
                 .constrainAs(back) {
                     start.linkTo(parent.start, spacing_4)
-                    top.linkTo(parent.top, spacing_2)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
                 }
         )
         Text(
@@ -327,7 +328,8 @@ fun MovieDetailToolbar(
                     end = parent.end,
                     endMargin = spacing_10
                 )
-                top.linkTo(parent.top, spacing_2)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
             }
         )
         Divider(

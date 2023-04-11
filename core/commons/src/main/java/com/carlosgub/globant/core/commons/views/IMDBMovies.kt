@@ -177,7 +177,7 @@ fun IMDBMoviesItem(
             )
 
             Text(
-                text = movieModel.originalTitle,
+                text = movieModel.title,
                 textAlign = TextAlign.Start,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
